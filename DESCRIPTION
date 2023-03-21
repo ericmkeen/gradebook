@@ -1,0 +1,25 @@
+Package: gradebook
+Title: Efficiently manage grades for a school course
+Version: 0.0.0.9000
+Authors@R: 
+    person("Eric", "Ezell", , "ericmkeen@gmail.com", role = c("aut", "cre"))
+Description: Efficiently manage grades for a school course.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.2
+Imports: 
+    DataCombine,
+    devtools,
+    dplyr,
+    DT,
+    lubridate,
+    readr,
+    rintrojs,
+    shiny,
+    shinydashboard,
+    shinyjs,
+    shinythemes,
+    shinyWidgets,
+    stringr,
+    usethis
