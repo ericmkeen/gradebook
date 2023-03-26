@@ -28,12 +28,20 @@ if(FALSE){
 #use_mit_license()
 
 
-# Install shipstrike
+# Install gradebook
 library(devtools)
 devtools::install_github('ericmkeen/gradebook')
 library(gradebook)
 
 
+# Try it =======================================================================
+
+# Setup course
+setup_course('ENST_320')
+
+# Load student roster
+students_url <- 'https://docs.google.com/spreadsheets/d/1otjd7iItkm9wvexXxQNQxppvOmMEagc4NchcQilzsY4/edit?usp=sharing'
+update_roster('ENST_320', students_url)
 
 
 

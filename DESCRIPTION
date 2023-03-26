@@ -13,6 +13,8 @@ Imports:
     devtools,
     dplyr,
     DT,
+    gmailr,
+    gsheet,
     lubridate,
     readr,
     rintrojs,
