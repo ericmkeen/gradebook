@@ -10,7 +10,7 @@ setup_course(course_id)
 \item{course_id}{Character vector of ID for your course, e.g., "ENST_320"}
 }
 \value{
-
+desc
 }
 \description{
 Creates the course subfolder within your working directory.

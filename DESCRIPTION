@@ -7,21 +7,29 @@ Description: Efficiently manage grades for a school course.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.3
 Imports: 
     DataCombine,
     devtools,
     dplyr,
     DT,
+    forcats,
+    ggplot2,
+    ggpubr,
+    ggtext,
     gmailr,
     gsheet,
     lubridate,
     readr,
     rintrojs,
     shiny,
+    shinyalert,
     shinydashboard,
     shinyjs,
     shinythemes,
     shinyWidgets,
     stringr,
     usethis
+Depends: 
+    R (>= 2.10)
+LazyData: true

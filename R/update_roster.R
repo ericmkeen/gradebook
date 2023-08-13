@@ -16,7 +16,7 @@ update_roster <- function(course_id,
                           verbose = TRUE){
 
   if(FALSE){ # dev/debugging only
-    course_id <- 'ENST_320'
+    course_id <- 'ESCI_220'
     students_url <- 'https://docs.google.com/spreadsheets/d/1otjd7iItkm9wvexXxQNQxppvOmMEagc4NchcQilzsY4/edit?usp=sharing'
   }
 

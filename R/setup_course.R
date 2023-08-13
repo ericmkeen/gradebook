@@ -5,7 +5,7 @@
 #'
 #' @param course_id Character vector of ID for your course, e.g., "ENST_320"
 #'
-#' @return
+#' @return desc
 #' @export
 #'
 setup_course <- function(course_id){
@@ -26,6 +26,31 @@ setup_course <- function(course_id){
   }
 
   sub_grades <- paste0(course_id, '/grades')
+  if(!dir.exists(sub_grades)){
+    dir.create(sub_grades)
+  }
+
+  sub_grades <- paste0(course_id, '/rubrics')
+  if(!dir.exists(sub_grades)){
+    dir.create(sub_grades)
+  }
+
+  sub_grades <- paste0(course_id, '/reports')
+  if(!dir.exists(sub_grades)){
+    dir.create(sub_grades)
+  }
+
+  sub_grades <- paste0(course_id, '/reports/grades')
+  if(!dir.exists(sub_grades)){
+    dir.create(sub_grades)
+  }
+
+  sub_grades <- paste0(course_id, '/reports/students')
+  if(!dir.exists(sub_grades)){
+    dir.create(sub_grades)
+  }
+
+  sub_grades <- paste0(course_id, '/reports/class')
   if(!dir.exists(sub_grades)){
     dir.create(sub_grades)
   }

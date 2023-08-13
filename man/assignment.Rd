@@ -10,31 +10,37 @@ assignment(
   assignment_category,
   out_of,
   due_date,
+  extra_credit = FALSE,
+  share = TRUE,
   rubric = NULL,
   portal = NULL,
   overwrite = TRUE
 )
 }
 \arguments{
-\item{course_id}{desc}
+\item{course_id}{Course ID}
 
-\item{assignment_id}{desc}
+\item{assignment_id}{Unique identifier for assignment.}
 
-\item{assignment_category}{desc}
+\item{assignment_category}{Category of assignments this assignment belongs to (e.g., 'Reading quizzes', or 'Essays', or 'Exams').}
 
-\item{out_of}{desc}
+\item{out_of}{Number of points this assignment is worth.}
 
-\item{due_date}{desc}
+\item{due_date}{Due date of assignment, in the format \code{YYYY-MM-DD}.}
 
-\item{rubric}{desc}
+\item{extra_credit}{If \code{TRUE}, this is an extra credit opportunity and should be treated as such in downstream grade calculations.}
 
-\item{portal}{desc}
+\item{share}{If \code{TRUE}, the grade for this assignment should be emailed to the students. It can be handy to set this to \code{FALSE} for regular completion grades, such as reading quizzes.}
 
-\item{overwrite}{desc}
+\item{rubric}{Provide an optional rubric here, in the form of a list in which each slot is named with a character string indicating what is being assessed (e.g., 'Quality of writing') and the content of each slot is a grade scale (see built-in dataset \code{grade_scale1} as an example). If left as \code{NULL}, the default rubric will be used (see the built-in dataset \code{default_rubric}).}
+
+\item{portal}{Option to include a URL (as a character string) to the portal where submissions can be found. For convenience only.}
+
+\item{overwrite}{If \code{TRUE}, running this function will overwrite any existing assignments with the same \code{assignment_id}. This is a useful way to update assignment details.}
 }
 \value{
-
+This function will save this assignment into an \code{.rds} file within the \code{assignments} subfolder for the relevant course. It will also save a stylized version of the rubric to the \code{rubrics} folder.
 }
 \description{
-Create an assignment
+Create an assignment for a course, with rubric and all other details attached.
 }

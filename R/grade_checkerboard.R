@@ -1,4 +1,0 @@
-grade_checkerboard <- function(){
-
-
-}

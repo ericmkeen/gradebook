@@ -1,0 +1,113 @@
+#' Render grade report for a student
+#'
+#' @param course_id Course ID
+#' @param goes_by Student name (goes_by column)
+#'
+#' @return A list.
+#' @export
+#' @import dplyr
+#' @import ggplot2
+#' @import ggpubr
+
+render_student <- function(course_id,
+                           goes_by){
+
+  if(FALSE){ #=======================
+    course_id <- 'ENST_209'
+    goes_by <- 'Student 1'
+  }  #===============================
+
+  # Get class data
+  (mr <- view_status(course_id))
+  stud <- goes_by
+  rm(goes_by)
+
+  # Filter to student
+  (mrs <- mr %>% filter(goes_by == stud))
+
+  # Filter to rows with a grade or that should already be graded based on due date
+  (mrs <- mrs[which(mrs$graded | all(c(!is.na(mrs$already_due), mr$already_due==TRUE))),])
+
+  # Get exemptions
+  (exemptions <- paste(mrs %>% filter(exemption == TRUE) %>% pull(assignment_id),
+                      collapse = ', '))
+
+  # Remove exemptions
+  (mrs <- mrs %>% filter(exemption == FALSE))
+
+  # Arrange by due date
+  mrs <- mrs %>% arrange(due_date)
+
+  # If a grade is missing (due date is past but no grade, change to 0)
+  mrs$percent[is.na(mrs$percent)] <- 0
+  mrs$points[is.na(mrs$points)] <- 0
+
+  # Add points possible column
+  mrs$total_possible <- cumsum(mrs$out_of)
+  mrs$total_earned <- cumsum(mrs$points)
+  mrs$total_percent <- 100*round((mrs$total_earned / mrs$total_possible),4)
+
+  # View
+  mrs
+
+  # Plot 1: Percents for each grade, arranged chronologically
+  a <-
+    ggplot(mrs %>% mutate(rank = n():1)) +
+    geom_point(mapping = aes(y=rank,
+                             x=percent), color='firebrick', alpha=.7) +
+    geom_segment(mapping = aes(y=rank, yend=rank,
+                             x=0, xend=percent), color='firebrick', alpha=.7) +
+    geom_vline(xintercept = mrs$total_percent[nrow(mrs)], lty=2, color='darkblue', alpha=.7) +
+    scale_x_continuous(limits=c(0,100), breaks=seq(0,100,by=10)) +
+    scale_y_continuous(labels = rev(mrs$assignment_id)) +
+    ylab(NULL) + xlab('Assignment grade') +
+    labs(title=paste0('All grades on record'))
+
+  if(nchar(exemptions)>4){
+    a <- a + labs(caption = paste0('Exemptions applied to: ', exemptions))
+  }
+
+  #a
+
+  # Plot 2: Cumulative points earned
+  b <-
+    ggplot(mrs) +
+    geom_point(mapping = aes(x=due_date, y=total_possible), color='darkblue', alpha=.5) +
+    geom_path(mapping = aes(x=due_date, y=total_possible), lty=2, color='darkblue', alpha=.5) +
+    geom_area(mapping = aes(x=due_date, y=total_earned), fill='firebrick', alpha=.5) +
+    geom_point(mapping = aes(x=due_date, y=total_earned), color='firebrick') +
+    geom_path(mapping = aes(x=due_date, y=total_earned), color='firebrick', alpha=.8, lwd=1.2) +
+    xlab('Due date') +
+    ylab('Points') +
+    labs(title='Points possible (blue dashed lne) vs. points earned (red)')
+
+  #b
+
+
+  # Plot 3: Running percentage
+  c <-
+    ggplot(mrs) +
+    geom_point(mapping = aes(x=due_date, y=total_percent), color='firebrick') +
+    geom_area(mapping = aes(x=due_date, y=total_percent), fill='firebrick', alpha=.5) +
+    geom_path(mapping = aes(x=due_date, y=total_percent), color='firebrick', alpha=.8, lwd=1.2) +
+    xlab('Due date') +
+    scale_y_continuous(breaks = seq(0, 100, by=10), limits=c(0,100)) +
+    geom_hline(yintercept = 100, lty=2) +
+    ylab('Overall grade') +
+    labs(title=paste0(stud, ' in ', gsub('_', '', course_id),
+                      ': current grade = ',
+                      mrs$total_percent[nrow(mrs)],
+                      '%'))
+
+  #c
+
+
+  rendered_report <- ggpubr::ggarrange(c, b, a, ncol=1, nrow=3, heights = c(1, 1, 2))
+
+  df <- list(data = mrs,
+             current_grade = mrs$total_percent[nrow(mrs)],
+             render = rendered_report)
+
+  return(df)
+
+}
