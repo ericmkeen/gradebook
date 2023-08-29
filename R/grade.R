@@ -120,7 +120,7 @@ grade <- function(penalty_choices=c('N/A', 'Late', 'Behavior', 'Other'),
         }
         if(nrow(students)>0){
           selectInput('student', label=h4('Student:'),
-                      choices = students$goes_by,
+                      choices = sort(students$goes_by),
                       selected=1, width='100%',
                       selectize = FALSE,
                       multiple = FALSE,
@@ -442,6 +442,9 @@ grade <- function(penalty_choices=c('N/A', 'Late', 'Behavior', 'Other'),
         rv$grade_status <- view_status(course_id = input$course)
         print('grade status updated!')
         print(rv$grade_status)
+
+        # Reset values
+        shinyjs::reset("exempt")
 
       }
     })
