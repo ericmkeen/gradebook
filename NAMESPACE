@@ -2,6 +2,7 @@
 
 export(assignment)
 export(email_grades)
+export(email_test)
 export(grade)
 export(plot_assignment_calendar)
 export(plot_assignment_weights)
