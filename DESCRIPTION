@@ -1,6 +1,6 @@
 Package: gradebook
 Title: Efficiently manage grades for a school course
-Version: 0.0.1.0
+Version: 0.0.1.1
 Authors@R: 
     person("Eric", "Ezell", , "ericmkeen@gmail.com", role = c("aut", "cre"))
 Description: Efficiently manage grades for a school course.

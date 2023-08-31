@@ -28,7 +28,7 @@ view_unshared <- function(course_id,
   if(nrow(df)==0){
       if(verbose){message('All grades have been shared!')}
     }else{
-      if(verbose){message('Found ',row(df),' unshared grades:\n')}
+      if(verbose){message('Found ', nrow(df),' unshared grades:\n')}
       return(df)
     }
 
