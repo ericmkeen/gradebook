@@ -19,12 +19,13 @@ email_grades  <- function(course_id,
                           verbose=TRUE){
 
   if(FALSE){ #=============================
+    course_id <- 'ENST_101'
     assignment_id <- NULL
     student_id <- NULL
     unshared_only <- TRUE
     verbose=TRUE
     your_email = 'ekezell@sewanee.edu'
-    json_path = '/Users/erickeen/repos/credentials/desktop_gradebook.json'
+    json_path = '/Users/ekezell/repos/credentials/desktop_gradebook.json'
     #email_grades(json_path = json_path)
 
   } #======================================
@@ -74,8 +75,8 @@ email_grades  <- function(course_id,
 
         # Loop through grades & send
         i=1
-        for(i in 1:length(unshared)){
-          (gradi <- unshared[i])
+        for(i in 1:nrow(unshared)){
+          (gradi <- unshared$grade_path[i])
           (report_fn <- gsub('grades','reports/grades', gsub('RData','pdf', gradi)))
 
           if(verbose){base::message(i, ' --- sharing ',gradi)}
