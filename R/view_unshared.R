@@ -17,7 +17,7 @@ view_unshared <- function(course_id,
   df <- data.frame()
   (mrs <- view_status(course_id))
   if(nrow(mrs)>0){
-    df <- mrs %>% dplyr::filter(already_due == TRUE,
+    df <- mrs %>% dplyr::filter(already_due == TRUE | graded == TRUE,
                         share == TRUE,
                         shared == FALSE)
     if(nrow(df)==0){df <- data.frame()}
