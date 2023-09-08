@@ -60,6 +60,7 @@ grade <- function(penalty_choices=c('N/A', 'Late', 'Behavior', 'Other'),
         #### ADD check/filter about whether or not grade already exists
         shinyWidgets::materialSwitch('exempt', 'Exempt this student?',
                                      value=FALSE, width='100%', status='primary', right=TRUE, inline=FALSE),
+        sliderInput('extra_credit', 'Add % extra credit?', min=0, max=100, value=0, step=5, width='100%'),
         sliderInput('penalty', 'Apply % penalty?', min=0, max=100, value=0, step=5, width='100%'),
         selectInput('penalty_why', 'Cause of penalty?', choices=penalty_choices, selected=1, width='100%'),
         br(),
@@ -396,8 +397,9 @@ grade <- function(penalty_choices=c('N/A', 'Late', 'Behavior', 'Other'),
                       rubric_grades = rubric_grades,
                       feedback = rv$feedback_preview,
                       exemption = input$exempt, # if TRUE, do not include in final grade
+                      extra_credit = input$extra_credit,
                       penalty = round(input$penalty/100, 2), #
-                      penalty_cause = input$penalty_cause,
+                      penalty_cause = input$penalty_why,
                       shared = FALSE,
                       internal_comment = input$comment,
                       date_graded = as.character(Sys.time()))
@@ -408,7 +410,7 @@ grade <- function(penalty_choices=c('N/A', 'Late', 'Behavior', 'Other'),
           grade$points <- NA
           grade$out_of <- NA
         }else{
-          grade$percent <- round(mean(rubric_grades$percent, na.rm=TRUE)*(1 - grade$penalty), 5)
+          grade$percent <- round(mean(rubric_grades$percent, na.rm=TRUE)*(1 - grade$penalty), 5) + input$extra_credit
           grade$points <- round(((grade$percent / 100) * grade$assignment$out_of), 5)
         }
         print(grade)

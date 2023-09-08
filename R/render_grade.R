@@ -20,6 +20,7 @@ render_grade <- function(grade_file){
     grade_file <- "ESCI_220/grades/ESCI_220 --- R workshop --- #1 Carbon emissions --- ericmkeen.RData"
     grade_file <- 'ENST_209/grades/ENST_209 --- Reading quiz --- Week 13 Wednesday quiz --- Student 2.RData'
     grade_file <- 'ENST_209/grades/ENST_209 --- Book podcast --- Book podcast --- Student 3.RData'
+    grade_file <- 'ESCI_220/grades/ESCI_220 --- Mini-Watson --- Mini-Watson Pre-proposal --- Christian.RData'
     render_grade(grade_file)
   } #=================================
 
@@ -50,7 +51,7 @@ render_grade <- function(grade_file){
   wrapper <- function(x, ...) paste(strwrap(x, ...), collapse = "\n")
   grade$rubric_grades
   grade$rubric_grades$standard_rmd <-
-    sapply(grade$rubric_grades$standard_rmd, function(x){paste(strwrap(x, 25), collapse='<br>')})
+    sapply(grade$rubric_grades$standard_rmd, function(x){paste(strwrap(x, 30), collapse='<br>')})
 
   grade$rubric_grades$percent <- as.numeric(grade$rubric_grades$percent)
 
@@ -69,8 +70,10 @@ render_grade <- function(grade_file){
               size= 7/.pt,
               vjust = -1.5) +
     xlim(0, 100) +
-    scale_y_continuous(labels=(rev(grade$rubric_grades$standard_rmd)),
+    scale_y_continuous(labels=(grade$rubric_grades$standard_rmd),
                        breaks = grade$rubric_grades$rank) +
+    #scale_y_continuous(labels=(rev(grade$rubric_grades$standard_rmd)),
+    #                   breaks = grade$rubric_grades$rank) +
     ylab(NULL) +
     xlab('Percentage') +
     geom_vline(xintercept = grade$percent, lty=2, color='firebrick', lwd=.8, alpha=.6) +
@@ -103,7 +106,8 @@ render_grade <- function(grade_file){
   }
 
   p <- p + labs(title=assi, subtitle=studi, caption= capti)
-  p
+
+  #p
 
   # Feedback plot ==============================================================
 
@@ -163,7 +167,7 @@ render_grade <- function(grade_file){
     if(lines > 30){
       (line_ratio <- (3*n_standards) / (lines))
     }else{
-      line_ratio <- 1.2
+      line_ratio <- 1.8
     }
     reporti <- ggpubr::ggarrange(p, pf, nrow=2,
                                  heights=c(line_ratio,1))
@@ -185,10 +189,12 @@ render_grade <- function(grade_file){
 
   # Save rendered grade report =================================================
 
+  (ggheight <- (max(c(3.5, .7*grade$report$n_standards)) + 0.2*grade$report$feedback_lines))
+
   ggsave(filename = grade$report$filename,
          plot = grade$report$report,
          width = 7,
-         height = (max(c(3.5, 1*grade$report$n_standards)) + 0.5*grade$report$feedback_lines))
+         height = ggheight)
 
 
   # Update grade file ==========================================================
