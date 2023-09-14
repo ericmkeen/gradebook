@@ -198,7 +198,6 @@ render_grade <- function(grade_file){
 
 
   # Update grade file ==========================================================
-
-  saveRDS(grade, file=grade_file)
+  # saveRDS(grade, file=grade_file)
 
 }

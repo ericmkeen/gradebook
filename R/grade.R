@@ -20,6 +20,10 @@ grade <- function(penalty_choices=c('N/A', 'Late', 'Behavior', 'Other'),
                   render = TRUE){
 
   if(FALSE){
+    input <- list(course = 'ENST_209')
+    rv <- list()
+    setwd( "/Users/ekezell/Library/CloudStorage/GoogleDrive-ekezell@sewanee.edu/My Drive/grades/2023 fall")
+
     penalty_choices=c('N/A', 'Late', 'Behavior', 'Other')
     greeting = 'Dear STUDENT,\n\nWell-done here. I particularly appreciate \n\nMoving forward, I suggest focusing primarily upon \n'
     conclusion = '\n\nThank you again, STUDENT, for your hard work,\nProf. Ezell'
@@ -64,7 +68,7 @@ grade <- function(penalty_choices=c('N/A', 'Late', 'Behavior', 'Other'),
         sliderInput('penalty', 'Apply % penalty?', min=0, max=100, value=0, step=5, width='100%'),
         selectInput('penalty_why', 'Cause of penalty?', choices=penalty_choices, selected=1, width='100%'),
         br(),
-        checkboxInput('filter', 'Filter to students not-yet graded?', value=FALSE, width='100%'),
+        #checkboxInput('filter', 'Filter to students not-yet graded?', value=FALSE, width='100%'),
         checkboxInput('offer_feedback', 'Provide written feedback?', value=FALSE, width='100%'),
         hr(),
         actionButton('save', h3('Save grade'), width='100%'),
@@ -96,44 +100,10 @@ grade <- function(penalty_choices=c('N/A', 'Late', 'Behavior', 'Other'),
   server <- function(input, output, session) {
 
     #===========================================================================
-    # basic UI's
-
-    output$assignment <- renderUI({
-      if(!is.null(input$course)){
-        (asses <- dir(paste0(input$course, '/assignments')))
-        asses <- gsub('.rds','',asses)
-        selectInput('assignment', label=h4('Assignment:'),
-                    choices = asses, selected=1, width='100%')
-      }
-    })
-
-    output$student <- renderUI({
-      if(!is.null(input$course) &
-         !is.null(input$assignment)){
-        students <- view_students(input$course)
-        if(input$filter & nrow(rv$grade_status) > 0){
-          gradi <- rv$grade_status %>% filter(assignment_id == input$assignment, graded == FALSE)
-          if(nrow(gradi)>0){
-            students <- students %>% filter(goes_by %in% gradi$student)
-          }else{
-            students <- data.frame()
-          }
-        }
-        if(nrow(students)>0){
-          selectInput('student', label=h4('Student:'),
-                      choices = sort(students$goes_by),
-                      selected=1, width='100%',
-                      selectize = FALSE,
-                      multiple = FALSE,
-                      size = 5)
-        }
-      }
-    })
-
-    #===========================================================================
-    # reactive values
+    # reactive values, part 1
 
     rv <- reactiveValues()
+    rv$status <- NULL
     rv$assignment <- NULL
     rv$student <- NULL
     rv$canned_content <- ''
@@ -141,6 +111,54 @@ grade <- function(penalty_choices=c('N/A', 'Late', 'Behavior', 'Other'),
     rv$canned_other <- ''
     rv$feedback_preview <- ''
     rv$grade_status <- data.frame()
+
+    observeEvent(input$course,{
+      if(!is.null(input$course) & input$course != ''){
+        rv$status <- view_status(input$course)
+      }
+    })
+
+    #===========================================================================
+    # basic UI's
+
+    output$assignment <- renderUI({
+      if(!is.null(rv$status)){
+      #if(!is.null(input$course)){
+        #(asses <- dir(paste0(input$course, '/assignments')))
+        #asses <- gsub('.rds','',asses)
+        rv$status %>% head
+        (asses <- paste0(rv$status$assignment_category, ' --- ', rv$status$assignment_id) %>% unique %>% sort)
+        selectInput('assignment', label=h4('Assignment:'),
+                    choices = asses, selected=1, width='100%')
+      }
+    })
+
+    output$student <- renderUI({
+      if(!is.null(rv$status) && nrow(rv$status)>0){ #&
+         #!is.null(input$assignment)){
+        (students <- rv$status$goes_by %>% unique %>% sort)
+        #print(students)
+        #students <- view_students(input$course)
+        #if(input$filter & nrow(rv$grade_status) > 0){
+        #  gradi <- rv$grade_status %>% filter(assignment_id == input$assignment, graded == FALSE)
+        #  if(nrow(gradi)>0){
+        #    students <- students %>% filter(goes_by %in% gradi$student)
+        #  }else{
+        #    students <- data.frame()
+        #  }
+        #}
+        if(length(students)>0){
+          #if(nrow(students)>0){
+          selectInput('student', label=h4('Student:'),
+                      choices = students,
+                      #choices = sort(students$goes_by),
+                      selected=1, width='100%',
+                      selectize = FALSE,
+                      multiple = FALSE,
+                      size = 5)
+        }
+      }
+    })
 
     observeEvent(input$assignment,{
       if(!is.null(input$course) & input$course != '' &
@@ -155,7 +173,7 @@ grade <- function(penalty_choices=c('N/A', 'Late', 'Behavior', 'Other'),
     })
 
     observeEvent(input$student,{
-      if(!is.null(input$student)){
+      if(!is.null(rv$status) & !is.null(input$student)){
         load(paste0(input$course, '/students.rds'))
         studi <- students %>% filter(goes_by == input$student)
         #print(studi)
