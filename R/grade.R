@@ -459,9 +459,9 @@ grade <- function(penalty_choices=c('N/A', 'Late', 'Behavior', 'Other'),
                                timer = 800, animation = FALSE, size = "s", immediate = TRUE)
 
         # Update grade status dataframe
-        rv$grade_status <- view_status(course_id = input$course)
-        print('grade status updated!')
-        print(rv$grade_status)
+        #rv$grade_status <- view_status(course_id = input$course)
+        #print('grade status updated!')
+        #print(rv$grade_status)
 
         # Reset values
         shinyjs::reset("exempt")
