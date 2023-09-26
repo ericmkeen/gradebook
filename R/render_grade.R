@@ -22,6 +22,7 @@ render_grade <- function(grade_file){
     grade_file <- 'ENST_209/grades/ENST_209 --- Reading quiz --- Week 13 Wednesday quiz --- Student 2.RData'
     grade_file <- 'ENST_209/grades/ENST_209 --- Book podcast --- Book podcast --- Student 3.RData'
     grade_file <- 'ESCI_220/grades/ESCI_220 --- Mini-Watson --- Mini-Watson Pre-proposal --- Christian.RData'
+    grade_file <- 'ESCI_220/grades/ESCI_220 --- Mini-Watson --- Mini-Watson full proposal --- Zach.RData'
     render_grade(grade_file)
   } #=================================
 
@@ -173,7 +174,7 @@ render_grade <- function(grade_file){
     if(lines > 30){
       (line_ratio <- (3*n_standards) / (lines))
     }else{
-      line_ratio <- 1.8
+      line_ratio <- 5
     }
     reporti <- ggpubr::ggarrange(p, pf, nrow=2,
                                  heights=c(line_ratio,1))
@@ -195,7 +196,11 @@ render_grade <- function(grade_file){
 
   # Save rendered grade report =================================================
 
-  (ggheight <- (max(c(3.5, 1.1*grade$report$n_standards)) + 0.2*grade$report$feedback_lines))
+  (ggheight <- (max(c(3.5, 1.1*grade$report$n_standards)) + 0.1*grade$report$feedback_lines))
+  if(ggheight > 20){
+    ggheight <- .75*ggheight
+  }
+  ggheight
 
   ggsave(filename = grade$report$filename,
          plot = grade$report$report,
