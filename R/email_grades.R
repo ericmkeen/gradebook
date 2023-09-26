@@ -32,7 +32,7 @@ email_grades  <- function(course_id,
 
   if(unshared_only){
     # Get unshared grades
-    (unshared <- view_unshared(course_id = course_id, verbose=FALSE))
+    (unshared <- view_unshared(course_id = course_id, mode = 'complete', verbose=FALSE))
     if(verbose){base::message('Total unshared grades = ',nrow(unshared))}
   }else{
     unshared <- view_status(course_id)
