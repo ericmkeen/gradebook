@@ -4,6 +4,7 @@
 #' @param greeting Character vector
 #' @param conclusion Character vector
 #' @param canned_comments Optional URL (character vector) to a GoogleSheet with canned comments. Two columns in sheet: 'category' and 'comment'
+#' @param scroll_height Default height of student scrolling area, in pixels.
 #' @param render Default `TRUE` to render each grade's report as a `.PDF` as you work.
 #'
 #' @return This function launches a `Shiny` app that lets you grade submissions.
@@ -17,6 +18,7 @@ grade <- function(penalty_choices=c('N/A', 'Late', 'Behavior', 'Other'),
                   greeting = 'Dear STUDENT,\n\nWell-done here. I particularly appreciate \n\nMoving forward, I suggest focusing primarily upon \n',
                   conclusion = '\n\nThank you again, STUDENT, for your hard work,\nProf. Ezell',
                   canned_comments = NULL,
+                  scroll_height = 200,
                   render = TRUE){
 
   if(FALSE){
@@ -39,6 +41,7 @@ grade <- function(penalty_choices=c('N/A', 'Late', 'Behavior', 'Other'),
   (courses <- courses[! courses %in% c('.git', '.Rproj.user', 'man', 'R', 'data','z','other')])
 
   # Canned comments
+  comms_content <- comms_writing <- comms_other <- c()
   if(!is.null(canned_comments)){
     comms <- gsheet::gsheet2tbl(canned_comments)
     (comms_content <- comms %>% filter(category == 'content') %>% pull(comment))
@@ -51,30 +54,32 @@ grade <- function(penalty_choices=c('N/A', 'Late', 'Behavior', 'Other'),
 
   ui <- fluidPage(
     shinyjs::useShinyjs(),
+    htmltools::tags$style(type='text/css', ".selectize-input { font-size: 16px; line-height: 16px;} .selectize-dropdown { font-size: 16px; line-height: 16px; }"),
+    htmltools::tags$head(tags$style(HTML("pre { white-space: pre-wrap; word-break: keep-all; }"))),
     #br(),
     fluidRow(column(12, h5('gradebook'))),
     #hr(),
     sidebarLayout(
       sidebarPanel(
-        selectInput('course', label=h4('Course:'),
-                    choices = courses, selected=1, width='100%'),
-        uiOutput('assignment'),
-        uiOutput('student'),
+        fluidRow(column(12,
+                        selectInput('course', label=h4('Course:'),
+                                    choices = courses,
+                                    selected=1, width='100%'),
+                        uiOutput('assignment'),
+                        checkboxInput('offer_feedback', 'Provide written feedback?', value=FALSE, width='100%'),
+                        hr(),
+                        uiOutput('student'))),
         hr(),
-        #### ADD check/filter about whether or not grade already exists
+        actionButton('save', h3('Save grade'), width='100%'),
+        hr(),
+        br(),
         shinyWidgets::materialSwitch('exempt', 'Exempt this student?',
                                      value=FALSE, width='100%', status='primary', right=TRUE, inline=FALSE),
         sliderInput('extra_credit', 'Add % extra credit?', min=0, max=100, value=0, step=5, width='100%'),
         sliderInput('penalty', 'Apply % penalty?', min=0, max=100, value=0, step=5, width='100%'),
         selectInput('penalty_why', 'Cause of penalty?', choices=penalty_choices, selected=1, width='100%'),
         br(),
-        #checkboxInput('filter', 'Filter to students not-yet graded?', value=FALSE, width='100%'),
-        checkboxInput('offer_feedback', 'Provide written feedback?', value=FALSE, width='100%'),
-        hr(),
-        actionButton('save', h3('Save grade'), width='100%'),
-        br(), br(),
-        #actionButton('clear', h3('Clear / reset'), width='100%'),
-        width=3
+        width=4
       ),
 
       # Show a plot of the generated distribution
@@ -84,12 +89,12 @@ grade <- function(penalty_choices=c('N/A', 'Late', 'Behavior', 'Other'),
                         hr(),
                         uiOutput('feedback'),
                         uiOutput('preview_text'),
-                        verbatimTextOutput('feedback_preview'),
+                        uiOutput('feedback_preview_ui'),
                         hr(),
                         textInput('comment', "Comments (for instructor's eyes only)", width='100%')
         ), column(1)),
         br(),
-        width=9
+        width=8
       )
     )
   )
@@ -111,6 +116,9 @@ grade <- function(penalty_choices=c('N/A', 'Late', 'Behavior', 'Other'),
     rv$canned_other <- ''
     rv$feedback_preview <- ''
     rv$grade_status <- data.frame()
+    rv$comms_content <- comms_content
+    rv$comms_writing <- comms_writing
+    rv$comms_other <- comms_other
 
     observeEvent(input$course,{
       if(!is.null(input$course) & input$course != ''){
@@ -123,9 +131,6 @@ grade <- function(penalty_choices=c('N/A', 'Late', 'Behavior', 'Other'),
 
     output$assignment <- renderUI({
       if(!is.null(rv$status)){
-      #if(!is.null(input$course)){
-        #(asses <- dir(paste0(input$course, '/assignments')))
-        #asses <- gsub('.rds','',asses)
         rv$status %>% head
         (asses <- paste0(rv$status$assignment_category, ' --- ', rv$status$assignment_id) %>% unique %>% sort)
         selectInput('assignment', label=h4('Assignment:'),
@@ -135,27 +140,20 @@ grade <- function(penalty_choices=c('N/A', 'Late', 'Behavior', 'Other'),
 
     output$student <- renderUI({
       if(!is.null(rv$status) && nrow(rv$status)>0){ #&
-         #!is.null(input$assignment)){
         (students <- rv$status$goes_by %>% unique %>% sort)
-        #print(students)
-        #students <- view_students(input$course)
-        #if(input$filter & nrow(rv$grade_status) > 0){
-        #  gradi <- rv$grade_status %>% filter(assignment_id == input$assignment, graded == FALSE)
-        #  if(nrow(gradi)>0){
-        #    students <- students %>% filter(goes_by %in% gradi$student)
-        #  }else{
-        #    students <- data.frame()
-        #  }
-        #}
         if(length(students)>0){
-          #if(nrow(students)>0){
-          selectInput('student', label=h4('Student:'),
-                      choices = students,
-                      #choices = sort(students$goes_by),
-                      selected=1, width='100%',
-                      selectize = FALSE,
-                      multiple = FALSE,
-                      size = 5)
+          shinydashboard::box(
+            style=paste0('height:', scroll_height,'px; overflow-y: scroll;'),
+            shinyWidgets::radioGroupButtons(
+              inputId = "student",
+              label = NULL,
+              choices = students,
+              justified = TRUE,
+              size = 'lg',
+              direction = "vertical",
+              width = '100%'
+            )
+          )
         }
       }
     })
@@ -166,9 +164,8 @@ grade <- function(penalty_choices=c('N/A', 'Late', 'Behavior', 'Other'),
         (ass <- paste0(input$course, '/assignments/', input$assignment, '.rds'))
         assi <- readRDS(ass)
         rv$assignment <- assi
-
         # Update grade status dataframe
-        rv$grade_status <- view_status(course_id = input$course)
+        #rv$grade_status <- view_status(course_id = input$course)
       }
     })
 
@@ -185,27 +182,28 @@ grade <- function(penalty_choices=c('N/A', 'Late', 'Behavior', 'Other'),
     # rubric UI
 
     output$rubric <- shiny::renderUI({
-      stud <- rv$student
+      #stud <- rv$student
       ass <- rv$assignment
-      if(!is.null(stud) & !is.null(ass)){
+      #if(!is.null(stud) & !is.null(ass)){
+      if(!is.null(ass)){
         (rub <- ass$rubric)
         # If rub is NULL, this is a manual grade entry.
         if(is.null(rub)){
           outs = tagList()
           outs[[1]] <- br()
           outs[[2]] <- sliderInput('manual', label='Manual grade entry',
-                      min = 0,
-                      max = as.numeric(rv$assignment$out_of),
-                      value = .8 * as.numeric(rv$assignment$out_of),
-                      step = 0.25,
-                      width = '100%')
+                                   min = 0,
+                                   max = as.numeric(rv$assignment$out_of),
+                                   value = .8 * as.numeric(rv$assignment$out_of),
+                                   step = 0.25,
+                                   width = '100%')
           outs[[3]] <- br()
           outs[[4]] <- sliderInput('manual_ec', label='Extra credit?',
-                      min = 0,
-                      max = as.numeric(rv$assignment$out_of),
-                      value = 0,
-                      step = 0.25,
-                      width = '100%')
+                                   min = 0,
+                                   max = as.numeric(rv$assignment$out_of),
+                                   value = 0,
+                                   step = 0.25,
+                                   width = '100%')
           outs[[5]] <- br()
           outs
 
@@ -227,7 +225,6 @@ grade <- function(penalty_choices=c('N/A', 'Late', 'Behavior', 'Other'),
                      shiny::fluidRow(column(4, p(style="text-align: right;",
                                                  HTML(names(rub)[x]))),
                                      column(8,
-                                            #br(),
                                             shinyWidgets::sliderTextInput(
                                               inputId = paste0('rubric_',x),
                                               label = NULL,
@@ -248,23 +245,35 @@ grade <- function(penalty_choices=c('N/A', 'Late', 'Behavior', 'Other'),
 
     output$feedback <- shiny::renderUI({
       if(input$offer_feedback){
-        fluidRow(
-          column(6,
-                 h5('Canned comments'),
-                 uiOutput('canned_content'),
-                 uiOutput('canned_writing'),
-                 uiOutput('canned_other')
-          ),
-          column(6, uiOutput('feedback_text'))
-        )
+        if(!is.null(canned_comments)){
+          fluidRow(
+            column(6,
+                   h5('Canned comments'),
+                   uiOutput('canned_content'),
+                   uiOutput('canned_writing'),
+                   uiOutput('canned_other'),
+                   actionButton('refresh_comments', 'Refresh comments')
+            ),
+            column(6, uiOutput('feedback_text'))
+          )
+        }else{
+          fluidRow(column(12, uiOutput('feedback_text')))
+        }
       }
+    })
+
+    observeEvent(input$feedback_text,{
+      comms <- gsheet::gsheet2tbl(canned_comments)
+      rv$comms_content <- comms %>% filter(category == 'content') %>% pull(comment)
+      rv$comms_writing <- comms %>% filter(category == 'writing') %>% pull(comment)
+      rv$comms_other <- comms %>% filter(category == 'other') %>% pull(comment)
     })
 
     output$canned_content <- shiny::renderUI({
       if(!is.null(rv$student) & !is.null(rv$assignment)){
-        if(length(comms_content)>0){
-          canned <- c('None',comms_content)
-          canned <- comms_content
+        if(length(rv$comms_content)>0){
+          canned <- c('None',rv$comms_content)
+          canned <- rv$comms_content
           selectInput('canned_content', label='re: content', choices = canned, selected = NULL, multiple=TRUE, width='100%')
         }
       }
@@ -272,9 +281,9 @@ grade <- function(penalty_choices=c('N/A', 'Late', 'Behavior', 'Other'),
 
     output$canned_writing <- shiny::renderUI({
       if(!is.null(rv$student) & !is.null(rv$assignment)){
-        if(length(comms_writing)>0){
-          canned <- c('None',comms_writing)
-          canned <- comms_writing
+        if(length(rv$comms_writing)>0){
+          canned <- c('None',rv$comms_writing)
+          canned <- rv$comms_writing
           selectInput('canned_writing', label='re: writing', choices = canned, selected = NULL, multiple=TRUE, width='100%')
         }
       }
@@ -282,9 +291,9 @@ grade <- function(penalty_choices=c('N/A', 'Late', 'Behavior', 'Other'),
 
     output$canned_other <- shiny::renderUI({
       if(!is.null(rv$student) & !is.null(rv$assignment)){
-        if(length(comms_other)>0){
-          canned <- c('None',comms_other)
-          canned <- comms_other
+        if(length(rv$comms_other)>0){
+          canned <- c('None',rv$comms_other)
+          canned <- rv$comms_other
           selectInput('canned_other', label='re: other', choices = canned, selected = NULL, multiple=TRUE, width='100%')
         }
       }
@@ -295,6 +304,7 @@ grade <- function(penalty_choices=c('N/A', 'Late', 'Behavior', 'Other'),
         h5('Feedback preview:')
       }
     })
+
 
     output$feedback_text <- shiny::renderUI({
       if(!is.null(rv$student) & !is.null(rv$assignment)){
@@ -356,7 +366,13 @@ grade <- function(penalty_choices=c('N/A', 'Late', 'Behavior', 'Other'),
       }
     })
 
-    output$feedback_preview <- shiny::renderText({ if(input$offer_feedback){ rv$feedback_preview } })
+    output$feedback_preview_ui <- shiny::renderUI({
+      if(input$offer_feedback){
+        shiny::wellPanel(verbatimTextOutput('feedback_preview'))
+      }
+    })
+
+    output$feedback_preview <- shiny::renderText({ rv$feedback_preview })
 
 
     #===========================================================================
@@ -378,34 +394,34 @@ grade <- function(penalty_choices=c('N/A', 'Late', 'Behavior', 'Other'),
                                       letter = '')
         }else{
           # Yes rubric
-        (rubric_items <- names(rub))
+          (rubric_items <- names(rub))
 
-        # Harvest inputs
-        inputs <- shiny::reactiveValuesToList(input) # get list of all inputs
+          # Harvest inputs
+          inputs <- shiny::reactiveValuesToList(input) # get list of all inputs
 
-        # Inventory rubric grades
-        rubric_grades <- data.frame()
-        i=1
-        for(i in 1:length(rub)){
-          (standard <- names(rub)[i]) #%>% print
-          (rub_content <- rub[[i]])  #%>% print
-          decision <- 'category'
-          letter <- percent <- NA
-          if(is.data.frame(rub_content)){
-            (input_name <- paste0('rubric_',i))
-            (matchi <- which(names(inputs)==input_name)) #%>% print
-            (decision <- inputs[[matchi]]) #%>% print
-            (assi <- which(rub_content$description == decision)) #%>% print
-            if(length(assi)>0){
-              letter <- rub_content$letter[assi]
-              percent <- rub_content$percent[assi]
+          # Inventory rubric grades
+          rubric_grades <- data.frame()
+          i=1
+          for(i in 1:length(rub)){
+            (standard <- names(rub)[i]) #%>% print
+            (rub_content <- rub[[i]])  #%>% print
+            decision <- 'category'
+            letter <- percent <- NA
+            if(is.data.frame(rub_content)){
+              (input_name <- paste0('rubric_',i))
+              (matchi <- which(names(inputs)==input_name)) #%>% print
+              (decision <- inputs[[matchi]]) #%>% print
+              (assi <- which(rub_content$description == decision)) #%>% print
+              if(length(assi)>0){
+                letter <- rub_content$letter[assi]
+                percent <- rub_content$percent[assi]
+              }
             }
+            (rubric_gradi <- data.frame(standard, decision, percent, letter)) #%>% print
+            rubric_grades <- rbind(rubric_grades, rubric_gradi)
           }
-          (rubric_gradi <- data.frame(standard, decision, percent, letter)) #%>% print
-          rubric_grades <- rbind(rubric_grades, rubric_gradi)
-        }
 
-        print(rubric_grades)
+          print(rubric_grades)
         } # end of if there was a rubric
 
         # Initiate grade list
@@ -447,7 +463,7 @@ grade <- function(penalty_choices=c('N/A', 'Late', 'Behavior', 'Other'),
         saveRDS(grade, file=grade_fn)
         print('grade saved!')
 
-        # Render grade repor
+        # Render grade report
         if(grade$exemption == FALSE){
           render_grade(grade_fn)
           print('report generated!')
@@ -459,9 +475,9 @@ grade <- function(penalty_choices=c('N/A', 'Late', 'Behavior', 'Other'),
                                timer = 800, animation = FALSE, size = "s", immediate = TRUE)
 
         # Update grade status dataframe
-        #rv$grade_status <- view_status(course_id = input$course)
-        #print('grade status updated!')
-        #print(rv$grade_status)
+        # rv$grade_status <- view_status(course_id = input$course)
+        # print('grade status updated!')
+        # print(rv$grade_status)
 
         # Reset values
         shinyjs::reset("exempt")

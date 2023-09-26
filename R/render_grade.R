@@ -16,6 +16,7 @@
 render_grade <- function(grade_file){
 
   if(FALSE){ #========================
+    grade_file <- "ENST_101/grades/ENST_101 --- News brief --- News brief 1 --- Ivy.RData"
     grade_file <- "ESCI_220/grades/ESCI_220 --- R workshop --- #1 Carbon emissions --- ekezell.RData"
     grade_file <- "ESCI_220/grades/ESCI_220 --- R workshop --- #1 Carbon emissions --- ericmkeen.RData"
     grade_file <- 'ENST_209/grades/ENST_209 --- Reading quiz --- Week 13 Wednesday quiz --- Student 2.RData'
@@ -99,6 +100,11 @@ render_grade <- function(grade_file){
   }
   if(grade$assignment$extra_credit == TRUE){
     capti <- paste0(capti, '<br>', '**NOTE:** THIS ASSIGNMENT IS **EXTRA CREDIT**.')
+  }
+  if(!is.null(grade$extra_credit)){
+    if(grade$extra_credit > 0){
+      capti <- paste0(capti, '<br>', '**Note:** extra credit (',grade$extra_credit,' pts) applied.')
+    }
   }
   if(grade$penalty > 0){
     capti <- paste0(capti, '<br>', '**NOTE:** this assignment received a **penalty** of ', grade$penalty,'.<br>',
@@ -189,7 +195,7 @@ render_grade <- function(grade_file){
 
   # Save rendered grade report =================================================
 
-  (ggheight <- (max(c(3.5, .7*grade$report$n_standards)) + 0.2*grade$report$feedback_lines))
+  (ggheight <- (max(c(3.5, 1.1*grade$report$n_standards)) + 0.2*grade$report$feedback_lines))
 
   ggsave(filename = grade$report$filename,
          plot = grade$report$report,

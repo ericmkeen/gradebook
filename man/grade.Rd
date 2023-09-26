@@ -10,6 +10,7 @@ grade(
     "Dear STUDENT,\\n\\nWell-done here. I particularly appreciate \\n\\nMoving forward, I suggest focusing primarily upon \\n",
   conclusion = "\\n\\nThank you again, STUDENT, for your hard work,\\nProf. Ezell",
   canned_comments = NULL,
+  scroll_height = 200,
   render = TRUE
 )
 }
@@ -21,6 +22,8 @@ grade(
 \item{conclusion}{Character vector}
 
 \item{canned_comments}{Optional URL (character vector) to a GoogleSheet with canned comments. Two columns in sheet: 'category' and 'comment'}
+
+\item{scroll_height}{Default height of student scrolling area, in pixels.}
 
 \item{render}{Default \code{TRUE} to render each grade's report as a \code{.PDF} as you work.}
 }
