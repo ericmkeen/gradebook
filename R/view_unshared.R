@@ -34,7 +34,7 @@ view_unshared <- function(course_id,
     if(mode == 'complete'){
       return(df)
     }else{
-      dfsim <- df %>% select(course, assignment_id, due_date, goes_by)
+      dfsim <- df %>% select(course, assignment_id, due_date, goes_by, percent)
       return(dfsim)
     }
   }

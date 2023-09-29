@@ -14,7 +14,7 @@ render_student <- function(course_id,
 
   if(FALSE){ #=======================
     course_id <- 'ENST_209'
-    goes_by <- 'Student 1'
+    goes_by <- 'Cole'
   }  #===============================
 
   # Get class data
@@ -59,7 +59,7 @@ render_student <- function(course_id,
                              x=0, xend=percent), color='firebrick', alpha=.7) +
     geom_vline(xintercept = mrs$total_percent[nrow(mrs)], lty=2, color='darkblue', alpha=.7) +
     scale_x_continuous(limits=c(0,100), breaks=seq(0,100,by=10)) +
-    scale_y_continuous(labels = rev(mrs$assignment_id)) +
+    scale_y_continuous(breaks = 1:nrow(mrs),  labels = rev(mrs$assignment_id)) +
     ylab(NULL) + xlab('Assignment grade') +
     labs(title=paste0('All grades on record'))
 
@@ -67,7 +67,7 @@ render_student <- function(course_id,
     a <- a + labs(caption = paste0('Exemptions applied to: ', exemptions))
   }
 
-  #a
+  a
 
   # Plot 2: Cumulative points earned
   b <-
@@ -102,7 +102,8 @@ render_student <- function(course_id,
   #c
 
 
-  rendered_report <- ggpubr::ggarrange(c, b, a, ncol=1, nrow=3, heights = c(1, 1, 2))
+  rendered_report <- ggpubr::ggarrange(c, a, ncol=1, nrow=2, heights = c(1, 2))
+  #rendered_report <- ggpubr::ggarrange(c, b, a, ncol=1, nrow=3, heights = c(1, 1, 2))
 
   df <- list(data = mrs,
              current_grade = mrs$total_percent[nrow(mrs)],
