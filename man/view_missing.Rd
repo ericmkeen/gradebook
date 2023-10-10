@@ -4,10 +4,14 @@
 \alias{view_missing}
 \title{View missing grades}
 \usage{
-view_missing(course_id)
+view_missing(course_id, mode = "complete", verbose = FALSE)
 }
 \arguments{
 \item{course_id}{Course ID.}
+
+\item{mode}{How much info to provide? The \code{"simple"} mode just provides the essential info; the \code{"complete"} mode returns all information.}
+
+\item{verbose}{Print updates to console?}
 }
 \value{
 A dataframe.

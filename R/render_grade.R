@@ -23,6 +23,7 @@ render_grade <- function(grade_file){
     grade_file <- 'ENST_209/grades/ENST_209 --- Book podcast --- Book podcast --- Student 3.RData'
     grade_file <- 'ESCI_220/grades/ESCI_220 --- Mini-Watson --- Mini-Watson Pre-proposal --- Christian.RData'
     grade_file <- 'ESCI_220/grades/ESCI_220 --- Mini-Watson --- Mini-Watson full proposal --- Zach.RData'
+    grade_file <- 'ENST_209/grades/ENST_209 --- Film response --- Film response 1 --- Claire.RData'
     render_grade(grade_file)
   } #=================================
 
@@ -121,7 +122,7 @@ render_grade <- function(grade_file){
   lines <- 0
   if(nchar(grade$feedback)>1){
     (fb <- grade$feedback)
-    wrap_width <- 80
+    wrap_width <- 100
     #(chars <- nchar(fb))
     #(returns <- stringr::str_count(fb, '\n'))
     #(lines <- ceiling(chars / wrap_width) + returns)
@@ -140,7 +141,7 @@ render_grade <- function(grade_file){
                             hjust=0,
                             vjust=1,
                             label.colour='white',
-                            size=7/.pt) +
+                            size=8/.pt) +
       xlim(0,10) +
       ylim(0,lines) +
       theme_minimal() +
@@ -174,7 +175,7 @@ render_grade <- function(grade_file){
     if(lines > 30){
       (line_ratio <- (3*n_standards) / (lines))
     }else{
-      line_ratio <- 5
+      line_ratio <- 2.5
     }
     reporti <- ggpubr::ggarrange(p, pf, nrow=2,
                                  heights=c(line_ratio,1))

@@ -14,7 +14,7 @@
 #' @import dplyr
 #' @import shinyjs
 
-grade <- function(penalty_choices=c('N/A', 'Late', 'Behavior', 'Other'),
+grade <- function(penalty_choices=c('N/A', 'Late', 'No submission received', 'Behavior', 'Other'),
                   greeting = 'Dear STUDENT,\n\nWell-done here. I particularly appreciate \n\nMoving forward, I suggest focusing primarily upon \n',
                   conclusion = '\n\nThank you again, STUDENT, for your hard work,\nProf. Ezell',
                   canned_comments = NULL,

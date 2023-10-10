@@ -4,10 +4,12 @@
 \alias{view_unshared}
 \title{View which grades have not yet been emailed to students}
 \usage{
-view_unshared(course_id, verbose = TRUE)
+view_unshared(course_id, mode = "simple", verbose = TRUE)
 }
 \arguments{
 \item{course_id}{Course ID.}
+
+\item{mode}{How much info to provide? The \code{"simple"} mode just provides the essential info; the \code{"complete"} mode returns all information.}
 
 \item{verbose}{Print updates to console?}
 }
