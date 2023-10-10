@@ -4,6 +4,11 @@
 #' This function produces a .PNG (using `ggplot2`)
 #'
 #' @param grade_file Path to grade file (`.rds`).
+#' @param wrap_rubric Character width of rendered rubric lines before wrapping.
+#' @param wrap_notes Character width of rendered lines of written feedback notes before wrapping.
+#' @param render_ratio The height ratio of the rendered file's rubric section compared to the feedback section.
+#' The default is that the former section is 2.25x as tall as the latter.
+#' @param pdf_height The height of the PDF file. If left `NULL`, this will be estimated automatically.
 #'
 #' @return Render the report for a grade (in `<course>/reports/grades/`), save it to PNG, and update the `grade` file.
 #'
@@ -13,7 +18,11 @@
 #' @import ggtext
 #' @import ggpubr
 #'
-render_grade <- function(grade_file){
+render_grade <- function(grade_file,
+                         wrap_rubric = 30,
+                         wrap_notes = 100,
+                         render_ratio = 2.25,
+                         pdf_height = NULL){
 
   if(FALSE){ #========================
     grade_file <- "ENST_101/grades/ENST_101 --- News brief --- News brief 1 --- Ivy.RData"
@@ -24,6 +33,10 @@ render_grade <- function(grade_file){
     grade_file <- 'ESCI_220/grades/ESCI_220 --- Mini-Watson --- Mini-Watson Pre-proposal --- Christian.RData'
     grade_file <- 'ESCI_220/grades/ESCI_220 --- Mini-Watson --- Mini-Watson full proposal --- Zach.RData'
     grade_file <- 'ENST_209/grades/ENST_209 --- Film response --- Film response 1 --- Claire.RData'
+    wrap_rubric = 30
+    wrap_notes = 100
+    render_ratio = 2
+    pdf_height = NULL
     render_grade(grade_file)
   } #=================================
 
@@ -54,7 +67,7 @@ render_grade <- function(grade_file){
   wrapper <- function(x, ...) paste(strwrap(x, ...), collapse = "\n")
   grade$rubric_grades
   grade$rubric_grades$standard_rmd <-
-    sapply(grade$rubric_grades$standard_rmd, function(x){paste(strwrap(x, 30), collapse='<br>')})
+    sapply(grade$rubric_grades$standard_rmd, function(x){paste(strwrap(x, wrap_rubric), collapse='<br>')})
 
   grade$rubric_grades$percent <- as.numeric(grade$rubric_grades$percent)
 
@@ -122,7 +135,7 @@ render_grade <- function(grade_file){
   lines <- 0
   if(nchar(grade$feedback)>1){
     (fb <- grade$feedback)
-    wrap_width <- 100
+    wrap_width <- wrap_notes
     #(chars <- nchar(fb))
     #(returns <- stringr::str_count(fb, '\n'))
     #(lines <- ceiling(chars / wrap_width) + returns)
@@ -172,13 +185,14 @@ render_grade <- function(grade_file){
     '.pdf'))
 
   if(lines > 0){
-    if(lines > 30){
-      (line_ratio <- (3*n_standards) / (lines))
-    }else{
-      line_ratio <- 2.5
-    }
+
+    #if(lines > 30){
+    #  (line_ratio <- (3*n_standards) / (lines))
+    #}else{
+    #  line_ratio <- 2.5
+    #}
     reporti <- ggpubr::ggarrange(p, pf, nrow=2,
-                                 heights=c(line_ratio,1))
+                                 heights=c(render_ratio,1))
     #reporti
   }else{
     reporti <- p
@@ -197,9 +211,13 @@ render_grade <- function(grade_file){
 
   # Save rendered grade report =================================================
 
-  (ggheight <- (max(c(3.5, 1.1*grade$report$n_standards)) + 0.1*grade$report$feedback_lines))
-  if(ggheight > 20){
-    ggheight <- .75*ggheight
+  if(is.null(pdf_height)){
+    (ggheight <- (max(c(3.5, 1.1*grade$report$n_standards)) + 0.1*grade$report$feedback_lines))
+    if(ggheight > 20){
+      ggheight <- .75*ggheight
+    }
+  }else{
+    ggheight <- pdf_height
   }
   ggheight
 

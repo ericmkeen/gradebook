@@ -4,10 +4,25 @@
 \alias{render_grade}
 \title{Render the report for a grade}
 \usage{
-render_grade(grade_file)
+render_grade(
+  grade_file,
+  wrap_rubric = 30,
+  wrap_notes = 100,
+  render_ratio = 2.25,
+  pdf_height = NULL
+)
 }
 \arguments{
 \item{grade_file}{Path to grade file (\code{.rds}).}
+
+\item{wrap_rubric}{Character width of rendered rubric lines before wrapping.}
+
+\item{wrap_notes}{Character width of rendered lines of written feedback notes before wrapping.}
+
+\item{render_ratio}{The height ratio of the rendered file's rubric section compared to the feedback section.
+The default is that the former section is 2.25x as tall as the latter.}
+
+\item{pdf_height}{The height of the PDF file. If left \code{NULL}, this will be estimated automatically.}
 }
 \value{
 Render the report for a grade (in \verb{<course>/reports/grades/}), save it to PNG, and update the \code{grade} file.

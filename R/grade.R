@@ -1,11 +1,16 @@
 #' Launch grading app
 #'
-#' @param penalty_choices Character vector of options for explaining a grade penalty, if assigned.
 #' @param greeting Character vector
 #' @param conclusion Character vector
 #' @param canned_comments Optional URL (character vector) to a GoogleSheet with canned comments. Two columns in sheet: 'category' and 'comment'
+#' @param penalty_choices Character vector of options for explaining a grade penalty, if assigned.
 #' @param scroll_height Default height of student scrolling area, in pixels.
 #' @param render Default `TRUE` to render each grade's report as a `.PDF` as you work.
+#' @param wrap_rubric Character width of rendered rubric lines before wrapping.
+#' @param wrap_notes Character width of rendered lines of written feedback notes before wrapping.
+#' @param render_ratio The height ratio of the rendered file's rubric section compared to the feedback section.
+#' The default is that the former section is 2.25x as tall as the latter.
+#' @param pdf_height The height of the PDF file. If left `NULL`, this will be estimated automatically.
 #'
 #' @return This function launches a `Shiny` app that lets you grade submissions.
 #'
@@ -14,12 +19,16 @@
 #' @import dplyr
 #' @import shinyjs
 
-grade <- function(penalty_choices=c('N/A', 'Late', 'No submission received', 'Behavior', 'Other'),
-                  greeting = 'Dear STUDENT,\n\nWell-done here. I particularly appreciate \n\nMoving forward, I suggest focusing primarily upon \n',
+grade <- function(greeting = 'Dear STUDENT,\n\nWell-done here. I particularly appreciate \n\nMoving forward, I suggest focusing primarily upon \n',
                   conclusion = '\n\nThank you again, STUDENT, for your hard work,\nProf. Ezell',
                   canned_comments = NULL,
+                  penalty_choices=c('N/A', 'Late', 'No submission received', 'Behavior', 'Other'),
                   scroll_height = 200,
-                  render = TRUE){
+                  render = TRUE,
+                  wrap_rubric = 30,
+                  wrap_notes = 100,
+                  render_ratio = 2.25,
+                  pdf_height = NULL){
 
   if(FALSE){
     input <- list(course = 'ENST_209')
@@ -465,7 +474,11 @@ grade <- function(penalty_choices=c('N/A', 'Late', 'No submission received', 'Be
 
         # Render grade report
         if(grade$exemption == FALSE){
-          render_grade(grade_fn)
+          render_grade(grade_fn,
+                       wrap_rubric = wrap_rubric,
+                       wrap_notes = wrap_notes,
+                       render_ratio = render_ratio,
+                       pdf_height = pdf_height)
           print('report generated!')
         }
 

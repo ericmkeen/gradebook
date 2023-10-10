@@ -5,27 +5,40 @@
 \title{Launch grading app}
 \usage{
 grade(
-  penalty_choices = c("N/A", "Late", "No submission received", "Behavior", "Other"),
   greeting =
     "Dear STUDENT,\\n\\nWell-done here. I particularly appreciate \\n\\nMoving forward, I suggest focusing primarily upon \\n",
   conclusion = "\\n\\nThank you again, STUDENT, for your hard work,\\nProf. Ezell",
   canned_comments = NULL,
+  penalty_choices = c("N/A", "Late", "No submission received", "Behavior", "Other"),
   scroll_height = 200,
-  render = TRUE
+  render = TRUE,
+  wrap_rubric = 30,
+  wrap_notes = 100,
+  render_ratio = 2.25,
+  pdf_height = NULL
 )
 }
 \arguments{
-\item{penalty_choices}{Character vector of options for explaining a grade penalty, if assigned.}
-
 \item{greeting}{Character vector}
 
 \item{conclusion}{Character vector}
 
 \item{canned_comments}{Optional URL (character vector) to a GoogleSheet with canned comments. Two columns in sheet: 'category' and 'comment'}
 
+\item{penalty_choices}{Character vector of options for explaining a grade penalty, if assigned.}
+
 \item{scroll_height}{Default height of student scrolling area, in pixels.}
 
 \item{render}{Default \code{TRUE} to render each grade's report as a \code{.PDF} as you work.}
+
+\item{wrap_rubric}{Character width of rendered rubric lines before wrapping.}
+
+\item{wrap_notes}{Character width of rendered lines of written feedback notes before wrapping.}
+
+\item{render_ratio}{The height ratio of the rendered file's rubric section compared to the feedback section.
+The default is that the former section is 2.25x as tall as the latter.}
+
+\item{pdf_height}{The height of the PDF file. If left \code{NULL}, this will be estimated automatically.}
 }
 \value{
 This function launches a \code{Shiny} app that lets you grade submissions.

@@ -5,12 +5,28 @@
 \title{Render reports for a bunch of grades
 This function is a wrapper for \code{grade_render()}.}
 \usage{
-render_grades(course_id, assignment_id = NULL)
+render_grades(
+  course_id,
+  assignment_id = NULL,
+  wrap_rubric = 30,
+  wrap_notes = 100,
+  render_ratio = 2.25,
+  pdf_height = NULL
+)
 }
 \arguments{
 \item{course_id}{Course ID.}
 
 \item{assignment_id}{Assignment ID.}
+
+\item{wrap_rubric}{Character width of rendered rubric lines before wrapping.}
+
+\item{wrap_notes}{Character width of rendered lines of written feedback notes before wrapping.}
+
+\item{render_ratio}{The height ratio of the rendered file's rubric section compared to the feedback section.
+The default is that the former section is 2.25x as tall as the latter.}
+
+\item{pdf_height}{The height of the PDF file. If left \code{NULL}, this will be estimated automatically.}
 }
 \value{
 Updates grade file and grade report for all matching grades.
