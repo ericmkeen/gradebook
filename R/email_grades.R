@@ -4,6 +4,8 @@
 #' @param assignment_id Optionally specify an assignment; otherwise unsent grades from all assignments will be sent.
 #' @param student_id Optionally specify a student; otherwise unsent grades for all students will be sent.
 #' @param your_email Your email address.
+#' @param email_body The main body of the email message; this will appear one line below the greeting to the student.
+#' @param unshared_only Only share grades that have not yet been emailed? Default is `TRUE`.
 #' @param json_path File path to your `json` credentials on your machine. This is necessary to send emails via the package `gmailr`.
 #' @param verbose Print updates to console?
 #'
@@ -14,6 +16,7 @@ email_grades  <- function(course_id,
                           assignment_id = NULL,
                           student_id = NULL,
                           your_email = 'ekezell@sewanee.edu',
+                          email_body = 'Attached you will find your grade on this assignment.\n\nIf applicable, please recall that any overdue assignment (ones currently with a zero) can be updated if you submit the make-up materials.\n\nPlease let me know if you have any questions or concerns.\n\nBest wishes,\nProf. Ezell',
                           unshared_only = TRUE,
                           json_path = FALSE,
                           verbose=TRUE){
@@ -26,6 +29,7 @@ email_grades  <- function(course_id,
     verbose=TRUE
     your_email = 'ekezell@sewanee.edu'
     json_path = '/Users/ekezell/repos/credentials/desktop_gradebook.json'
+    email_body = 'Attached you will find your grade on this assignment.\n\nPlease let me know if you have any questions or concerns.\n\nBest wishes,\nProf. Ezell'
     #email_grades(json_path = json_path)
 
   } #======================================
@@ -89,7 +93,7 @@ email_grades  <- function(course_id,
             (cati <- grade$assignment$assignment_category)
             (assi <- grade$assignment$assignment_id)
             (subject <- paste0(gsub('_',' ',coursi),' | Feedback on ', cati,': ',assi))
-            (body <- paste0('Dear ', studi,',\n\nAttached you will find your grade on this assignment.\n\nPlease let me know if you have any questions or concerns.\n\nBest wishes,\nEKE'))
+            (body <- paste0('Dear ', studi,',\n\n',email_body))
 
             # troubleshooting
             if(FALSE){

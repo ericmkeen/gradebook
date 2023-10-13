@@ -9,6 +9,8 @@ email_grades(
   assignment_id = NULL,
   student_id = NULL,
   your_email = "ekezell@sewanee.edu",
+  email_body =
+    "Attached you will find your grade on this assignment.\\n\\nIf applicable, please recall that any overdue assignment (ones currently with a zero) can be updated if you submit the make-up materials.\\n\\nPlease let me know if you have any questions or concerns.\\n\\nBest wishes,\\nProf. Ezell",
   unshared_only = TRUE,
   json_path = FALSE,
   verbose = TRUE
@@ -22,6 +24,10 @@ email_grades(
 \item{student_id}{Optionally specify a student; otherwise unsent grades for all students will be sent.}
 
 \item{your_email}{Your email address.}
+
+\item{email_body}{The main body of the email message; this will appear one line below the greeting to the student.}
+
+\item{unshared_only}{Only share grades that have not yet been emailed? Default is \code{TRUE}.}
 
 \item{json_path}{File path to your \code{json} credentials on your machine. This is necessary to send emails via the package \code{gmailr}.}
 

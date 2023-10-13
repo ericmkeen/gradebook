@@ -2,6 +2,8 @@
 #'
 #' @param course_id Course ID
 #' @param goes_by Student name (goes_by column)
+#' @param gg_height Height of the `ggplot2` output, in inches.
+#' @param to_file Boolean; if `TRUE`, the report will be saved to the class's folder structure (course > reports > students)
 #'
 #' @return A list.
 #' @export
@@ -10,11 +12,15 @@
 #' @import ggpubr
 
 render_student <- function(course_id,
-                           goes_by){
+                           goes_by,
+                           gg_height = 10,
+                           to_file = FALSE){
 
   if(FALSE){ #=======================
     course_id <- 'ENST_209'
-    goes_by <- 'Cole'
+    goes_by <- 'Zach'
+    to_file <- FALSE
+    gg_height = 12
   }  #===============================
 
   # Get class data
@@ -45,7 +51,7 @@ render_student <- function(course_id,
   # Add points possible column
   mrs$total_possible <- cumsum(mrs$out_of)
   mrs$total_earned <- cumsum(mrs$points)
-  mrs$total_percent <- 100*round((mrs$total_earned / mrs$total_possible),4)
+  mrs$total_percent <- round(100*(mrs$total_earned / mrs$total_possible),1)
 
   # View
   mrs
@@ -58,7 +64,7 @@ render_student <- function(course_id,
     geom_segment(mapping = aes(y=rank, yend=rank,
                              x=0, xend=percent), color='firebrick', alpha=.7) +
     geom_vline(xintercept = mrs$total_percent[nrow(mrs)], lty=2, color='darkblue', alpha=.7) +
-    scale_x_continuous(limits=c(0,100), breaks=seq(0,100,by=10)) +
+    scale_x_continuous(limits=c(0,max(c(100, max(ceiling(mrs$percent))))), breaks=seq(0,100,by=10)) +
     scale_y_continuous(breaks = 1:nrow(mrs),  labels = rev(mrs$assignment_id)) +
     ylab(NULL) + xlab('Assignment grade') +
     labs(title=paste0('All grades on record'))
@@ -94,7 +100,7 @@ render_student <- function(course_id,
     scale_y_continuous(breaks = seq(0, 100, by=10), limits=c(0,100)) +
     geom_hline(yintercept = 100, lty=2) +
     ylab('Overall grade') +
-    labs(title=paste0(stud, ' in ', gsub('_', '', course_id),
+    labs(title=paste0(stud, ' in ', gsub('_', ' ', course_id),
                       ': current grade = ',
                       mrs$total_percent[nrow(mrs)],
                       '%'))
@@ -109,6 +115,20 @@ render_student <- function(course_id,
              current_grade = mrs$total_percent[nrow(mrs)],
              render = rendered_report)
 
-  return(df)
+  if(to_file){
+    # Check for directory first
+    (report_dir <- paste0(course_id,'/reports/students/'))
+    if(!dir.exists(report_dir)){
+      dir.create(report_dir)
+    }
+    (fn <-   paste0(report_dir, course_id,' as of ',
+                    lubridate::ymd(lubridate::date(Sys.time())),
+                    ' --- ',
+                    stud, '.pdf'))
+    ggsave(filename = fn,
+           plot = rendered_report,
+           height = gg_height)
+  }
 
+  return(df)
 }
