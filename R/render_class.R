@@ -91,7 +91,7 @@ render_class <- function(course_id,
     scale_x_continuous(breaks=seq(0, 100, by=10), limits=c(0, 105)) +
     labs(title = paste0(gsub('_',' ',course_id), ': grade distribution'))
 
-  returned <- list(grades = grades,
+  returned <- list(grades = data.frame(grades),
                    plot = p)
 
   return(returned)
