@@ -4,10 +4,14 @@
 \alias{render_class}
 \title{Render grades for entire class}
 \usage{
-render_class(course_id)
+render_class(course_id, letter_key = NULL)
 }
 \arguments{
 \item{course_id}{Course ID}
+
+\item{letter_key}{Optional; include a key for translating a percentage to a letter grade.
+For required format, see \code{data(letter_grade_key)}; you can also type \code{"default"}, and the function
+will load \code{data(letter_grade_key)} for you and use it.}
 }
 \value{
 A list.

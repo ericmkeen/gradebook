@@ -1,6 +1,9 @@
 #' Render grades for entire class
 #'
 #' @param course_id  Course ID
+#' @param letter_key  Optional; include a key for translating a percentage to a letter grade.
+#' For required format, see `data(letter_grade_key)`; you can also type `"default"`, and the function
+#' will load `data(letter_grade_key)` for you and use it.
 #'
 #' @return A list.
 #' @export
@@ -8,9 +11,11 @@
 #' @import ggplot2
 #' @import ggpubr
 #'
-render_class <- function(course_id){
+render_class <- function(course_id,
+                         letter_key = NULL){
 
   if(FALSE){ #=======================
+    setwd("/Users/ekezell/Library/CloudStorage/GoogleDrive-ekezell@sewanee.edu/My Drive/grades/2023 fall")
     course_id <- 'ENST_209'
   }  #=======================
 
@@ -45,6 +50,26 @@ render_class <- function(course_id){
               points_earned = max(total_earned)) %>%
     mutate(current_grade = round(100*(points_earned / points_possible),2)))
 
+  # Include letter grade key?
+  if(!is.null(letter_key)){
+    if(letter_key == 'default'){
+      data(letter_grade_key)
+    }else{
+      letter_grade_key <- letter_key
+    }
+
+    x <- 93
+    letters <- sapply(grades$current_grade, function(x){
+      (letti <- which(letter_grade_key$grade_floor <= round(x)))
+      letter_grade_key[letti,]
+      x_letter <- letter_grade_key$letter_detail[letti[1]]
+      return(x_letter)
+    })
+
+    grades$letter <- letters
+    grades
+  }
+
   p <-
     ggplot(grades) +
     geom_segment(mapping=aes(y = student, yend = student,
@@ -60,10 +85,10 @@ render_class <- function(course_id){
     geom_text(mapping=aes(y=student,
                           x=current_grade,
                           label = round(current_grade,1)),
-              nudge_x=3) +
+              nudge_x=5) +
     ylab(NULL) +
     xlab('Current grade') +
-    scale_x_continuous(breaks=seq(0, 100, by=10), limits=c(0, 100)) +
+    scale_x_continuous(breaks=seq(0, 100, by=10), limits=c(0, 105)) +
     labs(title = paste0(gsub('_',' ',course_id), ': grade distribution'))
 
   returned <- list(grades = grades,

@@ -85,6 +85,17 @@ default_rubric <- list('Quality of content & ideas' = grade_scale1,
 default_rubric
 #usethis::use_data(default_rubric, overwrite = TRUE)
 
+# Letter grade key
+letter_grade_key <- data.frame(letter_basic  = c('A',  'A', 'A',  'B',  'B', 'B',  'C',  'C', 'C',  'D',  'D', 'D',  'F'),
+                               letter_detail = c('A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'D-', 'F'),
+                               grade_floor   = c( 97,   93,  90,   87,   83,  80,   77,   73,  70,   67,   63,  60,  -Inf))
+library(dplyr)
+(letter_grade_key <-
+  letter_grade_key %>%
+  mutate(letter_detail = stringr::str_pad(letter_detail, width=2, side='right', pad=' ')))
+
+usethis::use_data(letter_grade_key, overwrite = TRUE)
+
 
 ################################################################################
 ################################################################################
