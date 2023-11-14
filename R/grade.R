@@ -271,7 +271,7 @@ grade <- function(greeting = 'Dear STUDENT,\n\nWell-done here. I particularly ap
       }
     })
 
-    observeEvent(input$feedback_text,{
+    observeEvent(input$refresh_comments,{
       comms <- gsheet::gsheet2tbl(canned_comments)
       rv$comms_content <- comms %>% filter(category == 'content') %>% pull(comment)
       rv$comms_writing <- comms %>% filter(category == 'writing') %>% pull(comment)
