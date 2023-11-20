@@ -40,6 +40,8 @@ grade <- function(greeting = 'Dear STUDENT,\n\nWell-done here. I particularly ap
     conclusion = '\n\nThank you again, STUDENT, for your hard work,\nProf. Ezell'
     canned_comments = 'https://docs.google.com/spreadsheets/d/1vClmqxbC5xhGig7hQyaRjx2rkc2vIUvNUkXXN2v4GOU/edit?usp=sharing'
     render = TRUE
+
+    grade()
   }
   ##############################################################################
   ##############################################################################
@@ -88,6 +90,7 @@ grade <- function(greeting = 'Dear STUDENT,\n\nWell-done here. I particularly ap
         sliderInput('penalty', 'Apply % penalty?', min=0, max=100, value=0, step=5, width='100%'),
         selectInput('penalty_why', 'Cause of penalty?', choices=penalty_choices, selected=1, width='100%'),
         br(),
+        actionButton('get_missing', label='See missing submissions', width='100%'),
         width=4
       ),
 
@@ -186,6 +189,19 @@ grade <- function(greeting = 'Dear STUDENT,\n\nWell-done here. I particularly ap
         rv$student <- studi[1,]
       }
     })
+
+    observeEvent(input$get_missing, {
+      if(!is.null(input$course)){
+        missings <- view_missing_quick(input$course, rv$assignment)
+        #print(missings)
+          showModal(modalDialog(
+            title = "Missing submissions for this assignment:",
+            paste(missings$goes_by, collapse=', '),
+            easyClose = TRUE
+          ))
+      }
+    })
+
 
     #===========================================================================
     # rubric UI
