@@ -33,6 +33,7 @@ render_grade <- function(grade_file,
     grade_file <- 'ESCI_220/grades/ESCI_220 --- Mini-Watson --- Mini-Watson Pre-proposal --- Christian.RData'
     grade_file <- 'ESCI_220/grades/ESCI_220 --- Mini-Watson --- Mini-Watson full proposal --- Zach.RData'
     grade_file <- 'ENST_209/grades/ENST_209 --- Film response --- Film response 1 --- Claire.RData'
+    grade_file <- "ESCI_220/grades/ESCI_220 --- Research Grant Proposal --- Pre-proposal submission --- Grace S..RData"
     wrap_rubric = 30
     wrap_notes = 100
     render_ratio = 2
@@ -92,10 +93,13 @@ render_grade <- function(grade_file,
     #                   breaks = grade$rubric_grades$rank) +
     ylab(NULL) +
     xlab('Percentage') +
-    geom_vline(xintercept = grade$percent, lty=2, color='firebrick', lwd=.8, alpha=.6) +
     theme(axis.text.y= ggtext::element_markdown(),
           plot.caption = ggtext::element_markdown())
 
+  if(!is.na(grade$percent)){
+    p <- p +
+      geom_vline(xintercept = grade$percent, lty=2, color='firebrick', lwd=.8, alpha=.6)
+  }
   #p
 
   # Prepare titles and subtitles  ==============================================

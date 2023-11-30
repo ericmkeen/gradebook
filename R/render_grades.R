@@ -21,6 +21,11 @@ render_grades <- function(course_id,
 
   if(FALSE){
     assignment_id <- '#1 Carbon emissions'
+    assignment_id <- 'Pre-proposal submission'
+    wrap_rubric = 30
+    wrap_notes = 100
+    render_ratio = 2.25
+    pdf_height = NULL
   }
 
   (grade_dir <- paste0(course_id, '/grades/'))

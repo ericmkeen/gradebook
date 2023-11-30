@@ -23,6 +23,7 @@ email_grades  <- function(course_id,
 
   if(FALSE){ #=============================
     course_id <- 'ENST_101'
+    course_id <- 'ESCI_220'
     assignment_id <- NULL
     student_id <- NULL
     unshared_only <- TRUE
