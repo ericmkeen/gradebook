@@ -28,6 +28,14 @@ render_student <- function(course_id,
     drop_lowest = 'Reading quiz'
 
     render_student(course_id, goes_by, drop_lowest)
+
+    df <- render_student('ENST_209',
+                   'Betsy',
+                   #drop_lowest = NULL
+                   #drop_lowest = 'Reading quiz'
+                   drop_lowest = 'Film response'
+                   )
+    df$render
   }  #===============================
 
   # Get class data
@@ -41,45 +49,25 @@ render_student <- function(course_id,
   # Filter to rows with a grade or that should already be graded based on due date
   (mrs <- mrs[which(mrs$graded | all(c(!is.na(mrs$already_due), mr$already_due==TRUE))),])
 
-  # Get exemptions
-  (exemptions <- paste(mrs %>% filter(exemption == TRUE) %>% pull(assignment_id),
-                      collapse = ', '))
-
-  # Remove exemptions
-  (mrs <- mrs %>% filter(exemption == FALSE))
-
-  # Arrange by due date
-  mrs <- mrs %>% arrange(due_date)
-
   # If a grade is missing (due date is past but no grade, change to 0)
   mrs$percent[is.na(mrs$percent)] <- 0
   mrs$points[is.na(mrs$points)] <- 0
 
-  # Deal with drop_lowest ======================================================
-  mrs$i <- 1:nrow(mrs)
+  # Deal with drop_lowest (just convert to exemption = TRUE)
   if(!is.null(drop_lowest)){
-    (i_to_drop <-
-      mrs %>%
-      filter(assignment_category %in% drop_lowest) %>%
-      group_by(assignment_category) %>%
-      mutate(lowest = min(percent, na.rm=TRUE)) %>%
-      mutate(highest = max(percent, na.rm=TRUE)) %>%
-      mutate(high_test = lowest == highest) %>%
-      mutate(i_drop = tail(i[percent == lowest], 1)) %>%
-      mutate(i_drop = ifelse(high_test, NA, i_drop)) %>%
-      summarize(lowest = lowest[1],
-                high_test = high_test[1],
-                i_drop = tail(i_drop, 1)) %>%
-      filter(!is.na(i_drop)) %>%
-      pull(i_drop))
+    mrs <- drop_lowest_grade(mrs, drop_lowest)
+  }
 
-    if(length(i_to_drop)>0){
-      nrow(mrs)
-      mrs <- mrs %>% filter(! i %in% i_to_drop)
-      nrow(mrs)
-    }
-    mrs <- mrs %>% select(-i)
-  } # ==========================================================================
+  # Arrange by due date
+  mrs <- mrs %>% arrange(due_date)
+
+  # Get exemptions
+  (exemptions <- paste(mrs %>% filter(exemption == TRUE) %>% pull(assignment_id),
+                       collapse = ', '))
+  message('Exemptions: ', exemptions)
+
+  # Remove exemptions
+  (mrs <- mrs %>% filter(exemption == FALSE))
 
   # Add points possible column
   mrs$total_possible <- cumsum(mrs$out_of)

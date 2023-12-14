@@ -21,7 +21,7 @@ render_class <- function(course_id,
 
   if(FALSE){ #=======================
     setwd("/Users/ekezell/Library/CloudStorage/GoogleDrive-ekezell@sewanee.edu/My Drive/grades/2023 fall")
-    course_id <- 'ESCI_220'
+    course_id <- 'ENST_209'
     view_assignments(course_id)
     apply_curve = 0
     apply_curve = 10
@@ -30,6 +30,7 @@ render_class <- function(course_id,
     drop_lowest <- c('Reading quiz')
     render_class('ENST_209')
     render_class('ENST_209', c('Reading quiz'))
+    render_class('ENST_209', c('Film response'))
     render_class('ESCI_220')
     render_class('ESCI_220', apply_curve = 10)
 
@@ -37,46 +38,26 @@ render_class <- function(course_id,
 
   (mr <- view_status(course_id))
 
-  # Filter to non-exempt grades and/or grades already due
+  # Filter to graded grades or grades already due
   (mrs <-
     mr %>%
-    filter(exemption == FALSE) %>%
     filter(graded == TRUE | all(c(!is.na(already_due), already_due == TRUE))))
 
   # If a grade is missing (due date is past but no grade, change to 0)
   mrs$percent[is.na(mrs$percent)] <- 0
   mrs$points[is.na(mrs$points)] <- 0
 
-  # identifier
-  mrs$i <- 1:nrow(mrs)
-
-  # Deal with drop_lowest ======================================================
+  # Deal with drop_lowest (convert to exemption)
+  table(mrs$exemption)
   if(!is.null(drop_lowest)){
-    i_to_drop <-
-      mrs %>%
-      filter(assignment_category %in% drop_lowest) %>%
-      group_by(goes_by, assignment_category) %>%
-      mutate(lowest = min(percent, na.rm=TRUE)) %>%
-      mutate(highest = max(percent, na.rm=TRUE)) %>%
-      mutate(high_test = lowest == highest) %>%
-      mutate(i_drop = tail(i[percent == lowest], 1)) %>%
-      mutate(i_drop = ifelse(high_test, NA, i_drop)) %>%
-      summarize(lowest = lowest[1],
-                high_test = high_test[1],
-                i_drop = tail(i_drop, 1)) %>%
-      filter(!is.na(i_drop)) %>%
-      pull(i_drop)
+    mrs <- drop_lowest_grade(mrs, drop_lowest)
+  }
+  table(mrs$exemption)
 
-    i_to_drop
-
-    if(length(i_to_drop)>0){
-      nrow(mrs)
-      mrs <- mrs %>% filter(! i %in% i_to_drop)
-      nrow(mrs)
-    }
-
-    mrs <- mrs %>% select(-i)
-  } # ==========================================================================
+  # Filter to non-exempt grades
+  (mrs <- mrs %>%
+      filter(exemption == FALSE) %>%
+      filter(graded == TRUE | all(c(!is.na(already_due), already_due == TRUE))))
 
   # Group by student and calculate final grade
   studs <-
