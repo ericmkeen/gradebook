@@ -2,6 +2,8 @@
 #'
 #' @param course_id Course ID
 #' @param goes_by Student name (goes_by column)
+#' @param drop_lowest Optional; if there are `assignment_category`'s for which you want to drop the lowest grade for each student,
+#' provide those categories here as a character vector.
 #' @param gg_height Height of the `ggplot2` output, in inches.
 #' @param to_file Boolean; if `TRUE`, the report will be saved to the class's folder structure (course > reports > students)
 #'
@@ -13,6 +15,7 @@
 
 render_student <- function(course_id,
                            goes_by,
+                           drop_lowest = NULL,
                            gg_height = 10,
                            to_file = FALSE){
 
@@ -21,6 +24,10 @@ render_student <- function(course_id,
     goes_by <- 'Zach'
     to_file <- FALSE
     gg_height = 12
+    drop_lowest = NULL
+    drop_lowest = 'Reading quiz'
+
+    render_student(course_id, goes_by, drop_lowest)
   }  #===============================
 
   # Get class data
@@ -47,6 +54,32 @@ render_student <- function(course_id,
   # If a grade is missing (due date is past but no grade, change to 0)
   mrs$percent[is.na(mrs$percent)] <- 0
   mrs$points[is.na(mrs$points)] <- 0
+
+  # Deal with drop_lowest ======================================================
+  mrs$i <- 1:nrow(mrs)
+  if(!is.null(drop_lowest)){
+    (i_to_drop <-
+      mrs %>%
+      filter(assignment_category %in% drop_lowest) %>%
+      group_by(assignment_category) %>%
+      mutate(lowest = min(percent, na.rm=TRUE)) %>%
+      mutate(highest = max(percent, na.rm=TRUE)) %>%
+      mutate(high_test = lowest == highest) %>%
+      mutate(i_drop = tail(i[percent == lowest], 1)) %>%
+      mutate(i_drop = ifelse(high_test, NA, i_drop)) %>%
+      summarize(lowest = lowest[1],
+                high_test = high_test[1],
+                i_drop = tail(i_drop, 1)) %>%
+      filter(!is.na(i_drop)) %>%
+      pull(i_drop))
+
+    if(length(i_to_drop)>0){
+      nrow(mrs)
+      mrs <- mrs %>% filter(! i %in% i_to_drop)
+      nrow(mrs)
+    }
+    mrs <- mrs %>% select(-i)
+  } # ==========================================================================
 
   # Add points possible column
   mrs$total_possible <- cumsum(mrs$out_of)
