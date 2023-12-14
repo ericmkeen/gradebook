@@ -21,12 +21,18 @@ render_class <- function(course_id,
 
   if(FALSE){ #=======================
     setwd("/Users/ekezell/Library/CloudStorage/GoogleDrive-ekezell@sewanee.edu/My Drive/grades/2023 fall")
-    course_id <- 'ENST_209'
+    course_id <- 'ESCI_220'
     view_assignments(course_id)
+    apply_curve = 0
+    apply_curve = 10
+    drop_lowest = NULL
+    letter_key = NULL
     drop_lowest <- c('Reading quiz')
     render_class('ENST_209')
     render_class('ENST_209', c('Reading quiz'))
-    apply_curve = 0
+    render_class('ESCI_220')
+    render_class('ESCI_220', apply_curve = 10)
+
   }  #=======================
 
   (mr <- view_status(course_id))
@@ -90,9 +96,9 @@ render_class <- function(course_id,
               grades_available = n(),
               points_possible = max(total_possible),
               points_earned = max(total_earned)) %>%
-    mutate(current_grade = round(100*(points_earned / points_possible),2))) %>%
+    mutate(current_grade = round(100*(points_earned / points_possible),2)) %>%
     # apply curve to final percent
-    mutate(current_grade = current_grade + apply_curve)
+    mutate(current_grade = current_grade + apply_curve))
 
   # Include letter grade key?
   if(!is.null(letter_key)){
