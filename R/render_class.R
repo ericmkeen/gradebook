@@ -3,6 +3,7 @@
 #' @param course_id  Course ID
 #' @param drop_lowest Optional; if there are `assignment_category`'s for which you want to drop the lowest grade for each student,
 #' provide those categories here as a character vector.
+#' @param apply_curve Optional; adjust the entire class's grades by a percentage point that you can specify here.
 #' @param letter_key  Optional; include a key for translating a percentage to a letter grade.
 #' For required format, see `data(letter_grade_key)`; you can also type `"default"`, and the function
 #' will load `data(letter_grade_key)` for you and use it.
@@ -15,6 +16,7 @@
 #'
 render_class <- function(course_id,
                          drop_lowest = NULL,
+                         apply_curve = 0,
                          letter_key = NULL){
 
   if(FALSE){ #=======================
@@ -24,6 +26,7 @@ render_class <- function(course_id,
     drop_lowest <- c('Reading quiz')
     render_class('ENST_209')
     render_class('ENST_209', c('Reading quiz'))
+    apply_curve = 0
   }  #=======================
 
   (mr <- view_status(course_id))
@@ -87,7 +90,9 @@ render_class <- function(course_id,
               grades_available = n(),
               points_possible = max(total_possible),
               points_earned = max(total_earned)) %>%
-    mutate(current_grade = round(100*(points_earned / points_possible),2)))
+    mutate(current_grade = round(100*(points_earned / points_possible),2))) %>%
+    # apply curve to final percent
+    mutate(current_grade = current_grade + apply_curve)
 
   # Include letter grade key?
   if(!is.null(letter_key)){

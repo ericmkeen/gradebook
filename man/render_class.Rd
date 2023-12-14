@@ -4,10 +4,15 @@
 \alias{render_class}
 \title{Render grades for entire class}
 \usage{
-render_class(course_id, letter_key = NULL)
+render_class(course_id, drop_lowest = NULL, apply_curve = 0, letter_key = NULL)
 }
 \arguments{
 \item{course_id}{Course ID}
+
+\item{drop_lowest}{Optional; if there are \code{assignment_category}'s for which you want to drop the lowest grade for each student,
+provide those categories here as a character vector.}
+
+\item{apply_curve}{Optional; adjust the entire class's grades by a percentage point that you can specify here.}
 
 \item{letter_key}{Optional; include a key for translating a percentage to a letter grade.
 For required format, see \code{data(letter_grade_key)}; you can also type \code{"default"}, and the function

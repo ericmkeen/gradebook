@@ -4,12 +4,21 @@
 \alias{render_student}
 \title{Render grade report for a student}
 \usage{
-render_student(course_id, goes_by, gg_height = 10, to_file = FALSE)
+render_student(
+  course_id,
+  goes_by,
+  drop_lowest = NULL,
+  gg_height = 10,
+  to_file = FALSE
+)
 }
 \arguments{
 \item{course_id}{Course ID}
 
 \item{goes_by}{Student name (goes_by column)}
+
+\item{drop_lowest}{Optional; if there are \code{assignment_category}'s for which you want to drop the lowest grade for each student,
+provide those categories here as a character vector.}
 
 \item{gg_height}{Height of the \code{ggplot2} output, in inches.}
 
