@@ -1,6 +1,8 @@
 #' Render grades for entire class
 #'
 #' @param course_id  Course ID
+#' @param drop_lowest Optional; if there are `assignment_category`'s for which you want to drop the lowest grade for each student,
+#' provide those categories here as a character vector.
 #' @param letter_key  Optional; include a key for translating a percentage to a letter grade.
 #' For required format, see `data(letter_grade_key)`; you can also type `"default"`, and the function
 #' will load `data(letter_grade_key)` for you and use it.
@@ -12,11 +14,16 @@
 #' @import ggpubr
 #'
 render_class <- function(course_id,
+                         drop_lowest = NULL,
                          letter_key = NULL){
 
   if(FALSE){ #=======================
     setwd("/Users/ekezell/Library/CloudStorage/GoogleDrive-ekezell@sewanee.edu/My Drive/grades/2023 fall")
     course_id <- 'ENST_209'
+    view_assignments(course_id)
+    drop_lowest <- c('Reading quiz')
+    render_class('ENST_209')
+    render_class('ENST_209', c('Reading quiz'))
   }  #=======================
 
   (mr <- view_status(course_id))
@@ -31,6 +38,37 @@ render_class <- function(course_id,
   mrs$percent[is.na(mrs$percent)] <- 0
   mrs$points[is.na(mrs$points)] <- 0
 
+  # identifier
+  mrs$i <- 1:nrow(mrs)
+
+  # Deal with drop_lowest ======================================================
+  if(!is.null(drop_lowest)){
+    i_to_drop <-
+      mrs %>%
+      filter(assignment_category %in% drop_lowest) %>%
+      group_by(goes_by, assignment_category) %>%
+      mutate(lowest = min(percent, na.rm=TRUE)) %>%
+      mutate(highest = max(percent, na.rm=TRUE)) %>%
+      mutate(high_test = lowest == highest) %>%
+      mutate(i_drop = tail(i[percent == lowest], 1)) %>%
+      mutate(i_drop = ifelse(high_test, NA, i_drop)) %>%
+      summarize(lowest = lowest[1],
+                high_test = high_test[1],
+                i_drop = tail(i_drop, 1)) %>%
+      filter(!is.na(i_drop)) %>%
+      pull(i_drop)
+
+    i_to_drop
+
+    if(length(i_to_drop)>0){
+      nrow(mrs)
+      mrs <- mrs %>% filter(! i %in% i_to_drop)
+      nrow(mrs)
+    }
+
+    mrs <- mrs %>% select(-i)
+  } # ==========================================================================
+
   # Group by student and calculate final grade
   studs <-
     mrs %>%
@@ -40,6 +78,7 @@ render_class <- function(course_id,
     mutate(total_earned = cumsum(points)) %>%
     mutate(total_percent = 100*round((total_earned / total_possible),4))
 
+  # ============================================================================
   # Get final grades
   (grades <-
     studs %>%
