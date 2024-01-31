@@ -8,6 +8,7 @@
 #' @param wrap_notes Character width of rendered lines of written feedback notes before wrapping.
 #' @param render_ratio The height ratio of the rendered file's rubric section compared to the feedback section.
 #' The default is that the former section is 2.25x as tall as the latter.
+#' @param ymax_padding An option for adding a bit to the Y axis in order to make room for rubric annotations during PDF render.
 #' @param pdf_height The height of the PDF file. If left `NULL`, this will be estimated automatically.
 #'
 #' @return Render the report for a grade (in `<course>/reports/grades/`), save it to PNG, and update the `grade` file.
@@ -22,6 +23,7 @@ render_grade <- function(grade_file,
                          wrap_rubric = 30,
                          wrap_notes = 100,
                          render_ratio = 2.25,
+                         ymax_padding = 0.2,
                          pdf_height = NULL){
 
   if(FALSE){ #========================
@@ -88,7 +90,8 @@ render_grade <- function(grade_file,
               vjust = -1.5) +
     xlim(0, 100) +
     scale_y_continuous(labels=(grade$rubric_grades$standard_rmd),
-                       breaks = grade$rubric_grades$rank) +
+                       breaks = grade$rubric_grades$rank,
+                       limits = c(0.8, (max(grade$rubric_grades$rank) + ymax_padding))) +
     #scale_y_continuous(labels=(rev(grade$rubric_grades$standard_rmd)),
     #                   breaks = grade$rubric_grades$rank) +
     ylab(NULL) +

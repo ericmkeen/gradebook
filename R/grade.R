@@ -10,6 +10,7 @@
 #' @param wrap_notes Character width of rendered lines of written feedback notes before wrapping.
 #' @param render_ratio The height ratio of the rendered file's rubric section compared to the feedback section.
 #' The default is that the former section is 2.25x as tall as the latter.
+#' @param ymax_padding An option for adding a bit to the Y axis in order to make room for rubric annotations during PDF render.
 #' @param pdf_height The height of the PDF file. If left `NULL`, this will be estimated automatically.
 #'
 #' @return This function launches a `Shiny` app that lets you grade submissions.
@@ -28,6 +29,7 @@ grade <- function(greeting = 'Dear STUDENT,\n\nWell-done here. I particularly ap
                   wrap_rubric = 30,
                   wrap_notes = 100,
                   render_ratio = 2.25,
+                  ymax_padding = .2,
                   pdf_height = NULL){
 
   if(FALSE){

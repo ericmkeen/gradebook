@@ -15,6 +15,7 @@ grade(
   wrap_rubric = 30,
   wrap_notes = 100,
   render_ratio = 2.25,
+  ymax_padding = 0.2,
   pdf_height = NULL
 )
 }
@@ -37,6 +38,8 @@ grade(
 
 \item{render_ratio}{The height ratio of the rendered file's rubric section compared to the feedback section.
 The default is that the former section is 2.25x as tall as the latter.}
+
+\item{ymax_padding}{An option for adding a bit to the Y axis in order to make room for rubric annotations during PDF render.}
 
 \item{pdf_height}{The height of the PDF file. If left \code{NULL}, this will be estimated automatically.}
 }
