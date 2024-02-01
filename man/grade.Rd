@@ -16,7 +16,7 @@ grade(
   wrap_notes = 100,
   render_ratio = 2.25,
   ymax_padding = 0.2,
-  pdf_height = NULL
+  pdf_height = 10
 )
 }
 \arguments{

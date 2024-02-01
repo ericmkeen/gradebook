@@ -5,6 +5,7 @@
 #' @param student_id Optionally specify a student; otherwise unsent grades for all students will be sent.
 #' @param your_email Your email address.
 #' @param email_body The main body of the email message; this will appear one line below the greeting to the student.
+#' @param exempt_body The body to use in the event that a student is exempt fro mthe given assignment.
 #' @param unshared_only Only share grades that have not yet been emailed? Default is `TRUE`.
 #' @param json_path File path to your `json` credentials on your machine. This is necessary to send emails via the package `gmailr`.
 #' @param verbose Print updates to console?
@@ -17,12 +18,13 @@ email_grades  <- function(course_id,
                           student_id = NULL,
                           your_email = 'ekezell@sewanee.edu',
                           email_body = 'Attached you will find your grade on this assignment.\n\nIf applicable, please recall that any overdue assignment (ones currently with a zero) can be updated if you submit the make-up materials.\n\nPlease let me know if you have any questions or concerns.\n\nBest wishes,\nProf. Ezell',
+                          exempt_body = 'This email is a confirmation that you were exempt from this assignment. Please let me know if you have any questions.\n\nProf. Ezell',
                           unshared_only = TRUE,
                           json_path = FALSE,
                           verbose=TRUE){
 
   if(FALSE){ #=============================
-    course_id <- 'ENST_101'
+    course_id <- 'ENST_338'
     course_id <- 'ESCI_220'
     assignment_id <- NULL
     student_id <- NULL
@@ -31,6 +33,7 @@ email_grades  <- function(course_id,
     your_email = 'ekezell@sewanee.edu'
     json_path = '/Users/ekezell/repos/credentials/desktop_gradebook.json'
     email_body = 'Attached you will find your grade on this assignment.\n\nPlease let me know if you have any questions or concerns.\n\nBest wishes,\nProf. Ezell'
+    exempt_body = 'This email is a confirmation that you were exempt from this assignment. Please let me know if you have any questions.\n\nProf. Ezell'
     #email_grades(json_path = json_path)
 
   } #======================================
@@ -88,13 +91,20 @@ email_grades  <- function(course_id,
           grade <- readRDS(gradi)
 
           if(grade$assignment$share){
+            (exempt_check <- grade$exemption)
             (studi <- grade$student$goes_by)
             (emaili <- grade$student$email)
             (coursi <- grade$assignment$course_id)
             (cati <- grade$assignment$assignment_category)
             (assi <- grade$assignment$assignment_id)
-            (subject <- paste0(gsub('_',' ',coursi),' | Feedback on ', cati,': ',assi))
-            (body <- paste0('Dear ', studi,',\n\n',email_body))
+
+            if(exempt_check){
+              (subject <- paste0(gsub('_',' ',coursi),' | Exemption for ', cati,': ',assi))
+              (body <- paste0('Dear ', studi,',\n\n', exempt_body))
+            }else{
+              (subject <- paste0(gsub('_',' ',coursi),' | Feedback on ', cati,': ',assi))
+              (body <- paste0('Dear ', studi,',\n\n',email_body))
+            }
 
             # troubleshooting
             if(FALSE){
@@ -106,14 +116,23 @@ email_grades  <- function(course_id,
               base::message('email body is ',body)
             }
 
-            # Compose message
-            gmailr::gm_mime() %>%
-              gmailr::gm_to(emaili) %>%
-              gmailr::gm_from(your_email) %>%
-              gmailr::gm_text_body(body) %>%
-              gmailr::gm_subject(subject) %>%
-              gmailr::gm_attach_file(file=report_fn) %>%
-              gmailr::gm_send_message()
+            # Prep and send email
+            if(exempt_check){
+              gmailr::gm_mime() %>%
+                gmailr::gm_to(emaili) %>%
+                gmailr::gm_from(your_email) %>%
+                gmailr::gm_text_body(body) %>%
+                gmailr::gm_subject(subject) %>%
+                gmailr::gm_send_message()
+            }else{
+              gmailr::gm_mime() %>%
+                gmailr::gm_to(emaili) %>%
+                gmailr::gm_from(your_email) %>%
+                gmailr::gm_text_body(body) %>%
+                gmailr::gm_subject(subject) %>%
+                gmailr::gm_attach_file(file=report_fn) %>%
+                gmailr::gm_send_message()
+            }
 
             Sys.sleep(1)
 

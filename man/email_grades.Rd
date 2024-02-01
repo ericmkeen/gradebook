@@ -11,6 +11,8 @@ email_grades(
   your_email = "ekezell@sewanee.edu",
   email_body =
     "Attached you will find your grade on this assignment.\\n\\nIf applicable, please recall that any overdue assignment (ones currently with a zero) can be updated if you submit the make-up materials.\\n\\nPlease let me know if you have any questions or concerns.\\n\\nBest wishes,\\nProf. Ezell",
+  exempt_body =
+    "This email is a confirmation that you were exempt from this assignment. Please let me know if you have any questions.\\n\\nProf. Ezell",
   unshared_only = TRUE,
   json_path = FALSE,
   verbose = TRUE
@@ -26,6 +28,8 @@ email_grades(
 \item{your_email}{Your email address.}
 
 \item{email_body}{The main body of the email message; this will appear one line below the greeting to the student.}
+
+\item{exempt_body}{The body to use in the event that a student is exempt fro mthe given assignment.}
 
 \item{unshared_only}{Only share grades that have not yet been emailed? Default is \code{TRUE}.}
 
