@@ -1,0 +1,51 @@
+---
+title: "`R` package `gradebook`"
+output: html_document
+author: Eric Keen Ezell
+date: "2024-01-24"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Introductory ideas
+
+### Installation
+
+The `gradebook` package can be downloaded directly from `GitHub`:
+
+```{r echo=TRUE, eval=FALSE}
+# Install devtools if needed
+if (!require('devtools')) install.packages('devtools')
+
+# Install package
+devtools::install_github('ericmkeen/gradebook')
+```
+
+Load into your `R` session:  
+
+```{r echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
+library(gradebook)
+```
+
+This vignette was made with `gradebook` version `r utils::packageVersion('gradebook')`, and will make use of a few other packages: 
+
+```{r echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE}
+library(dplyr)
+library(ggplot2)
+library(gsheet)
+library(tidyr)
+library(shiny)
+```
+
+### Part 1
+
+text
+
+```{r echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE, fig.width = 6, fig.height=6}
+#chunk
+```
+
+
+
