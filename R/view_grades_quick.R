@@ -14,8 +14,8 @@ view_grades_quick <- function(course_id,
                         assignment_id = NULL){
 
   if(FALSE){
-    course_id <- 'ESCI_220'
-    assignment_id <- NULL
+    course_id <- 'ENST_421'
+    assignment_id <- 'Week 03 journal'
   }
 
   # Get students
@@ -32,12 +32,12 @@ view_grades_quick <- function(course_id,
                assignment_id = lapply(grade_splits,'[[', 3) %>% unlist,
                goes_by = lapply(grade_splits,'[[', 4) %>% unlist))
 
-  assi <- assignment_id
+  (assi <- assignment_id)
 
   if(!is.null(assignment_id)){
     grades_df <-
       grades_df %>%
-      filter(assignment_id %in% assi)
+      filter(assignment_id == assi)
   }
 
   grades_df

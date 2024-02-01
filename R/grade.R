@@ -30,7 +30,7 @@ grade <- function(greeting = 'Dear STUDENT,\n\nWell-done here. I particularly ap
                   wrap_notes = 100,
                   render_ratio = 2.25,
                   ymax_padding = .2,
-                  pdf_height = NULL){
+                  pdf_height = 10){
 
   if(FALSE){
     input <- list(course = 'ENST_209')
@@ -69,6 +69,7 @@ grade <- function(greeting = 'Dear STUDENT,\n\nWell-done here. I particularly ap
     shinyjs::useShinyjs(),
     htmltools::tags$style(type='text/css', ".selectize-input { font-size: 16px; line-height: 16px;} .selectize-dropdown { font-size: 16px; line-height: 16px; }"),
     htmltools::tags$head(tags$style(HTML("pre { white-space: pre-wrap; word-break: keep-all; }"))),
+    shinyalert::useShinyalert(force=TRUE),
     #br(),
     fluidRow(column(12, h5('gradebook'))),
     #hr(),
@@ -93,6 +94,12 @@ grade <- function(greeting = 'Dear STUDENT,\n\nWell-done here. I particularly ap
         selectInput('penalty_why', 'Cause of penalty?', choices=penalty_choices, selected=1, width='100%'),
         br(),
         actionButton('get_missing', label='See missing submissions', width='100%'),
+        br(),
+        br(),
+        sliderInput('pdf_height', label = h6('Set height of PDF (inches)'), value = pdf_height, min = 4, max = 30, step = .5, width = '100%'),
+        sliderInput('render_ratio', label = h6('Height ratio of rubric to notes'), value = render_ratio, min = .25, max = 6, step = .1, width = '100%'),
+        sliderInput('wrap_rubric', label = h6('Line width of rubric items (in PDF)'), value = wrap_rubric, min = 20, max = 200, step = 1, width = '100%'),
+        sliderInput('wrap_notes', label = h6('Line width of notes'), value = wrap_notes, min = 20, max = 200, step = 1, width = '100%'),
         width=4
       ),
 
@@ -133,6 +140,7 @@ grade <- function(greeting = 'Dear STUDENT,\n\nWell-done here. I particularly ap
     rv$comms_content <- comms_content
     rv$comms_writing <- comms_writing
     rv$comms_other <- comms_other
+    rv$proceed <- FALSE
 
     observeEvent(input$course,{
       if(!is.null(input$course) & input$course != ''){
@@ -196,11 +204,11 @@ grade <- function(greeting = 'Dear STUDENT,\n\nWell-done here. I particularly ap
       if(!is.null(input$course)){
         missings <- view_missing_quick(input$course, rv$assignment)
         #print(missings)
-          showModal(modalDialog(
-            title = "Missing submissions for this assignment:",
-            paste(missings$goes_by, collapse=', '),
-            easyClose = TRUE
-          ))
+        showModal(modalDialog(
+          title = "Missing submissions for this assignment:",
+          paste(missings$goes_by, collapse=', '),
+          easyClose = TRUE
+        ))
       }
     })
 
@@ -409,7 +417,44 @@ grade <- function(greeting = 'Dear STUDENT,\n\nWell-done here. I particularly ap
       stud <- rv$student
       ass <- rv$assignment
       if(!is.null(stud) & !is.null(ass)){
+        # Check to see if grade is already on file for this students + assignment
+        #course_id <- 'ENST_338'
+        #ass <- list(assignment_id <- 'Group case study 1')
+        graded <- view_grades_quick(course_id = course_id, assignment_id = ass$assignment_id)
+        print(graded)
+        (grade_exists <- ifelse(stud$goes_by %in% graded$goes_by, TRUE, FALSE))
+        print(grade_exists)
+
+        if(grade_exists){
+          modal_confirm <- modalDialog(
+            "This student already has a grade on file for this assignment.",
+            title = "Grade already exists!",
+            footer = tagList(
+              actionButton("cancel", "Cancel"),
+              actionButton("ok", "Confirm -- overwrite grade!", class = "btn btn-danger")
+            ))
+          showModal(modal_confirm)
+        }else{
+          rv$proceed <- TRUE
+        }
+      }
+    })
+
+    observeEvent(input$ok, {
+      removeModal()
+      rv$proceed <- TRUE
+    })
+
+    observeEvent(input$cancel, {
+      removeModal()
+    })
+
+    observeEvent(rv$proceed,{
+      if(rv$proceed == TRUE){
+        (stud <- rv$student)
+        (ass <- rv$assignment)
         (rub <- ass$rubric)
+
         if(is.null(rub)){
           # No rubric -- manual grade entry
           manual_grade <- as.numeric(input$manual) + as.numeric(input$manual_ec)
@@ -493,10 +538,10 @@ grade <- function(greeting = 'Dear STUDENT,\n\nWell-done here. I particularly ap
         # Render grade report
         if(grade$exemption == FALSE){
           render_grade(grade_fn,
-                       wrap_rubric = wrap_rubric,
-                       wrap_notes = wrap_notes,
-                       render_ratio = render_ratio,
-                       pdf_height = pdf_height)
+                       wrap_rubric = input$wrap_rubric,
+                       wrap_notes = input$wrap_notes,
+                       render_ratio = input$render_ratio,
+                       pdf_height = input$pdf_height)
           print('report generated!')
         }
 
@@ -505,19 +550,13 @@ grade <- function(greeting = 'Dear STUDENT,\n\nWell-done here. I particularly ap
                                showCancelButton = FALSE, showConfirmButton = FALSE,
                                timer = 800, animation = FALSE, size = "s", immediate = TRUE)
 
-        # Update grade status dataframe
-        # rv$grade_status <- view_status(course_id = input$course)
-        # print('grade status updated!')
-        # print(rv$grade_status)
-
         # Reset values
         shinyjs::reset("exempt")
+        rv$proceed <- FALSE
 
-      }
-    })
+      }}) # end save reactive
 
     #===========================================================================
-
 
   }
 
