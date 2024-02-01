@@ -8,3 +8,5 @@ R package for efficiently managing grades for a school course
 remotes::install_github("ericmkeen/gradebook")
 library(gradebook)
 ```
+
+See the [**vignette**](https://ericmkeen.github.io/gradebook/) for a detailed demo. 
