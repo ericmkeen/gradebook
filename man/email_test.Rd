@@ -6,7 +6,10 @@
 \usage{
 email_test(
   recipient,
-  your_email = "ekezell@sewanee.edu",
+  your_email,
+  intro = "Dear STUDENT,",
+  signoff = "Best wishes,\\nProf. Ezell",
+  email_body = "This is a test email using the gradebook R package.",
   json_path,
   verbose = TRUE
 )
@@ -21,7 +24,7 @@ email_test(
 \item{verbose}{Print updates to console?}
 }
 \value{
-desc
+An email is sent, updates are written to Console.
 }
 \description{
 Send a test email

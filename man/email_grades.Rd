@@ -9,10 +9,12 @@ email_grades(
   assignment_id = NULL,
   student_id = NULL,
   your_email = "ekezell@sewanee.edu",
+  intro = "Dear STUDENT,",
+  signoff = "Best wishes,\\nProf. Ezell",
   email_body =
-    "Attached you will find your grade on this assignment.\\n\\nIf applicable, please recall that any overdue assignment (ones currently with a zero) can be updated if you submit the make-up materials.\\n\\nPlease let me know if you have any questions or concerns.\\n\\nBest wishes,\\nProf. Ezell",
+    "Attached you will find your grade on this assignment.\\n\\nIf applicable, please recall that any overdue assignment (ones currently with a zero) can be updated if you submit the make-up materials.\\n\\nPlease let me know if you have any questions or concerns.",
   exempt_body =
-    "This email is a confirmation that you were exempt from this assignment. Please let me know if you have any questions.\\n\\nProf. Ezell",
+    "This email is a confirmation that you were exempt from this assignment. Please let me know if you have any questions.",
   unshared_only = TRUE,
   json_path = FALSE,
   verbose = TRUE

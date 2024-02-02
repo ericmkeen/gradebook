@@ -17,8 +17,10 @@ email_grades  <- function(course_id,
                           assignment_id = NULL,
                           student_id = NULL,
                           your_email = 'ekezell@sewanee.edu',
-                          email_body = 'Attached you will find your grade on this assignment.\n\nIf applicable, please recall that any overdue assignment (ones currently with a zero) can be updated if you submit the make-up materials.\n\nPlease let me know if you have any questions or concerns.\n\nBest wishes,\nProf. Ezell',
-                          exempt_body = 'This email is a confirmation that you were exempt from this assignment. Please let me know if you have any questions.\n\nProf. Ezell',
+                          intro = 'Dear STUDENT,',
+                          signoff = 'Best wishes,\nProf. Ezell',
+                          email_body = 'Attached you will find your grade on this assignment.\n\nIf applicable, please recall that any overdue assignment (ones currently with a zero) can be updated if you submit the make-up materials.\n\nPlease let me know if you have any questions or concerns.',
+                          exempt_body = 'This email is a confirmation that you were exempt from this assignment. Please let me know if you have any questions.',
                           unshared_only = TRUE,
                           json_path = FALSE,
                           verbose=TRUE){
@@ -97,13 +99,14 @@ email_grades  <- function(course_id,
             (coursi <- grade$assignment$course_id)
             (cati <- grade$assignment$assignment_category)
             (assi <- grade$assignment$assignment_id)
+            (intro <- gsub('STUDENT', studi, intro))
 
             if(exempt_check){
               (subject <- paste0(gsub('_',' ',coursi),' | Exemption for ', cati,': ',assi))
-              (body <- paste0('Dear ', studi,',\n\n', exempt_body))
+              (body <- paste0(intro,'\n\n',exempt_body,'\n\n',signoff))
             }else{
               (subject <- paste0(gsub('_',' ',coursi),' | Feedback on ', cati,': ',assi))
-              (body <- paste0('Dear ', studi,',\n\n',email_body))
+              (body <- paste0(intro,'\n\n',email_body,'\n\n',signoff))
             }
 
             # troubleshooting

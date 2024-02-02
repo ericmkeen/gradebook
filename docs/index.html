@@ -358,7 +358,9 @@ display: none;
 </div>
 
 
+<p> </p>
 <p>Introductory ideas</p>
+<p> </p>
 <div id="installation" class="section level3">
 <h3>Installation</h3>
 <p>The <code>gradebook</code> package can be downloaded directly from
@@ -376,12 +378,844 @@ and will make use of a few other packages:</p>
 library(ggplot2)
 library(gsheet)
 library(tidyr)
-library(shiny)</code></pre>
+library(shiny)
+library(rstudioapi)</code></pre>
+<p> </p>
 </div>
-<div id="part-1" class="section level3">
-<h3>Part 1</h3>
+<div id="workflow-overview" class="section level3">
+<h3>Workflow overview</h3>
+<p>text</p>
+<p> </p>
+</div>
+<div id="setup-a-course" class="section level3">
+<h3>Setup a course</h3>
+<p>text</p>
+<pre class="r"><code>setup_course(course_id)</code></pre>
+<p> </p>
+<div id="course-directory" class="section level4">
+<h4>Course directory</h4>
 <p>text</p>
 <pre class="r"><code>#chunk</code></pre>
+<p> </p>
+</div>
+</div>
+<div id="setup-assignments" class="section level3">
+<h3>Setup assignments</h3>
+<p>Every graded assignment in the course needs to have details on file.
+To add an assignment to the course, use the function
+<code>assignment()</code>.</p>
+<pre class="r"><code>assignment(course_id = &#39;ENST_338&#39;,                     
+           assignment_category = &#39;Participation&#39;, 
+           assignment_id = &#39;Week 03 engagement&#39;,
+           out_of = 5, 
+           due_date = &#39;2024-02-01&#39;,
+           extra_credit = FALSE,
+           share = TRUE, 
+           rubric = NULL)</code></pre>
+<p>When this command is run, an <code>.RData</code> file with the
+assignment details is saved to
+<code>&lt;course_id&gt;/assignments/</code>.</p>
+<p>Note that <code>assignment_id</code> must be unique to all other
+assignment IDs.</p>
+<p>Also note that the <code>due_date</code> input needs to follow the
+format shown here: <code>yyyy-mm-dd</code>.</p>
+<p>Also note that the <code>rubric</code> input is <code>NULL</code>.
+This means that, when it comes time to grade this assignment, you will
+manually specificy a single numerical grade rather than fill out a
+rubric. (You will have an option to add written feedback, but the
+assessment record itself will just be a single manually-assigned
+grade.).</p>
+<p> </p>
+<div id="adding-a-rubric" class="section level4">
+<h4>Adding a rubric</h4>
+<p>To add a rubric to an assignment, you need to set up a named
+<code>list</code>. The names of the <code>list</code>’s element are the
+standards, and the contents of each element are the grade scale that
+will be used to assess its respective standard.</p>
+<p> </p>
+<div id="grading-scales" class="section level5">
+<h5>Grading scales</h5>
+<p>The <code>gradebook</code> package comes with several built-in grade
+scales to use or adapt for your own purposes:</p>
+<p>Option 1:</p>
+<pre class="r"><code>data(grade_scale1)
+grade_scale1</code></pre>
+<pre><code>##   letter percent rubric_slot        description
+## 1      F      55           1    Critical issues
+## 2      D      65           2        Many issues
+## 3      C      75           3 Focus on improving
+## 4      B      85           4      Strong / good
+## 5      A      95           5             Superb</code></pre>
+<p>Option 2:</p>
+<pre class="r"><code>data(grade_scale2) 
+grade_scale2</code></pre>
+<pre><code>##   letter percent rubric_slot  description
+## 1      F      55           1 Unacceptable
+## 2      C      75           3   Incomplete
+## 3      A      95           5     Complete</code></pre>
+<p>Option 3:</p>
+<pre class="r"><code>data(grade_scale3) 
+grade_scale3</code></pre>
+<pre><code>##   letter percent rubric_slot     description
+## 1      F      55           1 Critical issues
+## 2      C      75           3  Several issues
+## 3      A      95           5        No issue</code></pre>
+<p>Here’s an example of how one of these grade scales can be customized
+for your own needs:</p>
+<pre class="r"><code>grade_scale4 &lt;- grade_scale3
+grade_scale4$percent &lt;- c(60, 75, 90)
+grade_scale4</code></pre>
+<pre><code>##   letter percent rubric_slot     description
+## 1      F      60           1 Critical issues
+## 2      C      75           3  Several issues
+## 3      A      90           5        No issue</code></pre>
+<p> </p>
+</div>
+<div id="rubric-setup" class="section level5">
+<h5>Rubric setup</h5>
+<p>Here is an example of how to design a rubric.</p>
+<pre class="r"><code>rubric &lt;- 
+  list(&#39;A proper distillation, not an outline or preview&#39; = grade_scale1,
+       &#39;Detail-rich&#39; = grade_scale1,
+       &#39;All important aspects of the reading are covered&#39; = grade_scale4,
+       &#39;Writing is compelling, effective, efficient.&#39; = grade_scale4,
+       &quot;Within the word limit.&quot;=grade_scale4,
+       &#39;Adherence to instructions overall.&#39; = grade_scale4)</code></pre>
+<p>One this list is saved into an object, pass that object to the
+<code>rubric</code> input within the <code>assignment()</code>
+command.</p>
+<p>When the <code>assignment()</code> command is run, a <code>PDF</code>
+of the rubric is saved to the folder
+<code>&lt;course_id</code>&gt;/rubrics/`. The rubric above will look
+like this:</p>
+<p><strong>ADD IMAGE HERE</strong></p>
+<p>nbsp;</p>
+<p> </p>
+</div>
+<div id="advanced-rubric-formatting" class="section level5">
+<h5>Advanced rubric formatting</h5>
+<p><strong>Rubric categories:</strong> To organize your rubric content
+into categories (e.g., “Writing”, “Intellectual content”, or “Visual
+aids”), you can add a <code>list</code> element with the name of your
+desired category. The element’s content is simply the character string
+<code>&quot;category&quot;</code>. See the example below.</p>
+<p><strong>Bold text:</strong> To highlight certain text within the
+rubric in bold, use the <code>HTML</code> tags <code>&lt;b&gt;</code>
+and <code>&lt;/b&gt;</code>. See the example below.</p>
+<p><em>Example of a rubric with advanced formatting, for a group
+presentation assignment:</em>.</p>
+<pre class="r"><code>rubric &lt;- list(&#39;Substance&#39; = &#39;category&#39;,
+               &#39;&lt;b&gt;A strategic and well-crafted distillation/synthesis&lt;/b&gt; of the material.&#39; = grade_scale1,
+               &#39;Details make it clear that &lt;b&gt;all materials were studied closely and incorporated closely.&lt;/b&gt;&#39; = grade_scale4,
+               &#39;&lt;b&gt;All important aspects&lt;/b&gt; of the reading are covered properly within the word-limit constraints&#39; = grade_scale4,
+               &#39;&lt;b&gt;Story &amp; narrative:&lt;/b&gt; the talk takes the form of a story, taking the audience on a shared journey. Anecdotes, characters, plot twists, and heart are used throughout&#39; = grade_scale1,
+               &#39;&lt;b&gt;Organization overall&lt;/b&gt; is intuitive &amp; clear for the audience.&#39; = grade_scale1,
+               &#39;&lt;b&gt;First moments:&lt;/b&gt; Excellent, engaging, memorable &amp; relevant attention getter, setting the tone for the entire talk.&#39; = grade_scale1,
+               &#39;&lt;b&gt;Compelling justification:&lt;/b&gt; The audience is made to care about the issue &amp; context first, &lt;b&gt;before any mention&lt;/b&gt; of research or science&#39; = grade_scale1,
+               &#39;&lt;b&gt;Final moments:&lt;/b&gt; clear &amp; memorable summary of points; refers back to thesis/proposed project. Ends with strong take-away/punchline.&#39; = grade_scale1,
+               &#39;Delivery&#39; = &#39;category&#39;,
+               &#39;&lt;b&gt;Preparation:&lt;/b&gt; clearly well-prepared, evident in the timing of the talk, familiarity with visual aids and what will be said; no reading off slides.&#39; = grade_scale4,
+               &#39;&lt;b&gt;Time allocation:&lt;/b&gt; delivered within the allocated time window; time within the talk is allocated strategically. &#39; = grade_scale4,
+               &#39;All group members &lt;b&gt;share speaking load equally&lt;/b&gt;.&#39; = grade_scale4,
+               &#39;&lt;b&gt;Speech:&lt;/b&gt; conversational, sincere, dynamic &amp; compelling; good pace of speech; no trailing off or rambling; no vocal fillers; impactful use of pauses.&#39; = grade_scale1,
+               &#39;&lt;b&gt;Language:&lt;/b&gt; can articulate meaning clearly through eloquent word choice &amp; premeditated sentences; no unexplained jargon, abbreviations or acronyms.&#39; = grade_scale1,
+               &#39;&lt;b&gt;Explanation:&lt;/b&gt; Any word/concept that may not be understood is explained, either explicitly or within abundant context, at a level appropriate to audience.&#39; = grade_scale4,
+               &#39;&lt;b&gt;Non-verbal delivery:&lt;/b&gt; The “Second Conversation”: Attire, composure, &amp; body language reflect sincerity &amp; professionalism, without sacrificing authenticity.&#39; = grade_scale1,
+               &#39;&lt;b&gt;Mistakes:&lt;/b&gt; mistakes are handled in a graceful &amp; self-forgiving manner; recovery is quick.&#39; = grade_scale1,
+               &#39;&lt;b&gt;Energetic, relatable, genuine, poised, confident but vulnerable, at ease&lt;/b&gt;&#39; = grade_scale1,
+               &#39;Visual aids&#39; = &#39;category&#39;,
+               &#39;&lt;b&gt;Strategic use:&lt;/b&gt; redundancy (if any) between what is spoken and what is displayed is strategic, not used as a crutch for presenting.&#39; = grade_scale4,
+               &#39;&lt;b&gt;Design &amp; display:&lt;/b&gt; of professional quality, not sloppy or thrown together. Aids prioritize simplicity, clarity, and good design.&#39; = grade_scale4,
+               &#39;&lt;b&gt;Text is sparse&lt;/b&gt;; no more than 6 bullet points of large text, each spanning one line or less.&#39; = grade_scale4,
+               &#39;Any &lt;b&gt;data visualization&lt;/b&gt; has been reduced to the simplest possible form, or explained accordingly.&#39; = grade_scale4)</code></pre>
+<p> </p>
+</div>
+</div>
+<div id="replicate-similar-assignments" class="section level4">
+<h4>Replicate similar assignments</h4>
+<p>You may have an assignment that will be repeated several times
+throughout the semester, such as a weekly reading assignment. Each
+individual deadline needs to have its own assignment on file, but you
+can expedite the coding of all those assignments using a loop. Here is
+an example:</p>
+<pre class="r"><code>deadlines &lt;- c(&#39;2024-01-22&#39;,
+               &#39;2024-01-29&#39;,
+               &#39;2024-02-03&#39;,
+               &#39;2024-02-08&#39;,
+               &#39;2024-02-15&#39;)
+
+for(i in 1:length(deadlines)){
+  assignment(course_id = &#39;ENST_338&#39;, 
+             assignment_category = &#39;Reading assignments&#39;,
+             assignment_id = paste0(&#39;Week &#39;, i,&#39;: Group discussion&#39;),
+             out_of = 10,
+             due_date = due_dates[i]
+             share = TRUE, 
+             rubric = NULL)
+}</code></pre>
+<p> </p>
+</div>
+<div id="review-set-of-assignments" class="section level4">
+<h4>Review set of assignments</h4>
+<p>To get a list of all the assignments you have on file, use this:</p>
+<pre class="r"><code>view_assignments(&#39;ENST_338&#39;)</code></pre>
+<p> </p>
+</div>
+</div>
+<div id="summary-plots-for-your-syllabus" class="section level3">
+<h3>Summary plots for your syllabus</h3>
+<p>Once each and every one of your assignments for the semester is on
+file, you can create overview plots of the semester’s plan.</p>
+<p> </p>
+<div id="assignment-weights" class="section level4">
+<h4>Assignment weights</h4>
+<pre class="r"><code>plot_assignment_weights(course_id)</code></pre>
+<p><strong>ADD IMAGE HERE</strong></p>
+<p> </p>
+</div>
+<div id="calendar-of-points" class="section level4">
+<h4>Calendar of points</h4>
+<pre class="r"><code>plot_assignment_calendar(course_id)</code></pre>
+<p><strong>ADD IMAGE HERE</strong></p>
+<p> </p>
+</div>
+</div>
+<div id="setup-student-roster" class="section level3">
+<h3>Setup student roster</h3>
+<p>Now that assignments are setup, it’s time for students to register
+for your class! Once registration has occurred, you are ready to setup
+your course roster.</p>
+<p>The first step is creating a <code>GoogleSheet</code> with info for
+enrolled students.</p>
+<pre class="r"><code>students_url &lt;- &#39;https://docs.google.com/spreadsheets/d/1ISxHeEM-noYGNAAG-BEt0zQek94EAX4SZMuwgFXXqew/edit?usp=sharing&#39;
+update_roster(&#39;ENST_338&#39;, students_url) # rerun this each time your googlesheet is changed</code></pre>
+<p>Get email-ready list of students</p>
+<pre class="r"><code>paste(view_students(&#39;ENST_338&#39;)$email, collapse=&#39;, &#39;)</code></pre>
+<p> </p>
+</div>
+<div id="grading" class="section level3">
+<h3>Grading</h3>
+<p>text</p>
+<pre class="r"><code># Grade
+grade()
+
+# Reading assignments
+grade(wrap_rubric = 40, pdf_height = 5)
+
+# Print submitted reading assignments to Console for review
+form_url &lt;- &#39;https://docs.google.com/spreadsheets/d/1Zff8Ds--Yu4xPiVSLe4YV-3IZxwkpdX56LJjBXHQA1A/edit?usp=sharing&#39;
+review_google_form(view_students(&#39;ENST_421&#39;),
+                   form_url)
+
+# First case study / deep dive  ================================================
+
+grade(greeting = &quot;Dear STUDENT,\n\Great presentation! Thank you so much for leading the group into this part of the course with such a strong example.\n&quot;,
+      conclusion = &quot;\nThank you again, STUDENT.\n\nProf. Ezell&quot;,
+      wrap_rubric = 50,
+      wrap_notes = 100,
+      render_ratio = 5,
+      pdf_height = 15)</code></pre>
+<p> </p>
+<div id="pdf-report-of-grade" class="section level4">
+<h4>PDF report of grade</h4>
+<p>text</p>
+<pre class="r"><code>#chunk</code></pre>
+<p> </p>
+</div>
+<div id="adjusting-pdf-dimensions" class="section level4">
+<h4>Adjusting PDF dimensions</h4>
+<p>text</p>
+<pre class="r"><code>#chunk</code></pre>
+<p> </p>
+</div>
+<div id="providing-written-feedback" class="section level4">
+<h4>Providing written feedback</h4>
+<p>text</p>
+<pre class="r"><code>#chunk</code></pre>
+<p> </p>
+<div id="canned-comments" class="section level5">
+<h5>Canned comments</h5>
+<p>text</p>
+<pre class="r"><code>#chunk</code></pre>
+<p> </p>
+</div>
+</div>
+<div id="handling-special-cases" class="section level4">
+<h4>Handling special cases</h4>
+<p>text</p>
+<pre class="r"><code>#chunk</code></pre>
+<p> </p>
+<div id="no-submission-received" class="section level5">
+<h5>No submission received</h5>
+<p>text</p>
+<pre class="r"><code>#chunk</code></pre>
+<p> </p>
+</div>
+<div id="exemptions-from-assignment" class="section level5">
+<h5>Exemptions from assignment</h5>
+<p>text</p>
+<pre class="r"><code>#chunk</code></pre>
+<p> </p>
+</div>
+<div id="late-submissions-other-penalties" class="section level5">
+<h5>Late submissions &amp; other penalties</h5>
+<p>text</p>
+<pre class="r"><code>#chunk</code></pre>
+<p> </p>
+</div>
+<div id="extra-credit" class="section level5">
+<h5>Extra credit</h5>
+<p>text</p>
+<pre class="r"><code>#chunk</code></pre>
+<p> </p>
+</div>
+<div id="deleting-accidental-grades" class="section level5">
+<h5>Deleting accidental grades</h5>
+<p>text</p>
+<pre class="r"><code>#chunk</code></pre>
+<p> </p>
+</div>
+</div>
+</div>
+<div id="re-rendering-grade-pdfs" class="section level3">
+<h3>Re-rendering grade PDF’s</h3>
+<p>Re-render grade reports in a batch, if needed:</p>
+<pre class="r"><code>render_grades(&#39;ENST_338&#39;,
+              &#39;Presentation&#39;,
+              render_ratio =  4,
+              pdf_height = 7) </code></pre>
+<p> </p>
+<div id="check-for-missing-submissions" class="section level4">
+<h4>Check for missing submissions</h4>
+<pre class="r"><code>view_missing(&#39;ENST_338&#39;, mode = &#39;simple&#39;) 
+# are any students without a grade for an assignment that was already due?</code></pre>
+<p> </p>
+</div>
+</div>
+<div id="sending-out-grades" class="section level3">
+<h3>Sending out grades</h3>
+<p>To use this feature of <code>gradebook</code>, your computer must be
+setup to use the <code>R</code> package <code>gmailr</code>, which
+allows you to send Gmail messages directly from <code>R</code> using
+functions in <code>gradebook</code>.</p>
+<p> </p>
+<div id="setting-up-gmailr" class="section level4">
+<h4>Setting up <code>gmailr</code></h4>
+<p>This can be a tricky process. <a href="https://gmailr.r-lib.org/">Follow the instructions here,</a> which
+will also ask you to follow directions <a href="https://gmailr.r-lib.org/dev/articles/oauth-client.html">here</a>.
+The goals of the process are (1) to setup your Gmail account to permit
+external services, such as <code>R</code>, to send emails through the
+Gmail API, (2) to download a credentials <code>.json</code> file that is
+your passkey to accessing the API, and (3) telling
+<code>gradebook</code> where to find that credentials <code>.json</code>
+file.</p>
+<p>Once you believe you have <code>gmailr</code> up and running, send
+yourself a test email using the <code>gradebook</code> function
+<code>email_test()</code>.</p>
+<pre class="r"><code>email_test(
+  recipient,
+  your_email,
+  intro = &quot;Dear STUDENT,&quot;,
+  signoff = &quot;Best wishes,\nProf. Ezell&quot;,
+  email_body = &quot;This is a test email using the gradebook R package.&quot;,
+  json_path = &#39;/Users/fake/fake/fake/credentials.json&#39;)</code></pre>
+<p>Put your own email in the <code>recipient</code> input and the
+<code>your_email</code> input.</p>
+<p>When you run this command, you will likely be asked by the
+<code>R</code> console to be taken to a browser where you can select the
+Gmail account you wish to use, sign into it, and give permissions for
+<code>gmailr</code> to use your account.</p>
+<p>If that function works, and if you receive the test email, and if you
+see that you sent that email yourself within your <code>Sent</code> tab
+in Gmail, then you should be firing on all cylinders.</p>
+<p> </p>
+</div>
+<div id="check-to-see-which-grades-need-sharing" class="section level4">
+<h4>Check to see which grades need sharing</h4>
+<p>Each grade file keeps track of whether or not it has been shared by
+email with its respective student. To get a snapshot of grades that
+still need to be emailed out, use;</p>
+<pre class="r"><code>view_unshared(&#39;ENST_338&#39;) </code></pre>
+<p> </p>
+</div>
+<div id="emailing-grades" class="section level4">
+<h4>Emailing grades</h4>
+<p>To send out grade emails, use the function
+<code>email_grades()</code>.</p>
+<pre class="r"><code>email_grades(course_id = &#39;ENST_338&#39;,
+             your_email = &#39;ekezell@sewanee.edu&#39;,
+             intro = &#39;Dear STUDENT,&#39;,
+             signoff = &#39;Best wishes,\nProf. Ezell&#39;,
+             email_body =  &quot;Attached you will find your grade on this assignment.&quot;,
+             exempt_body = &quot;This email is a confirmation that you were exempt from this assignment.&quot;,
+             json_path = &#39;/Users/fake/fake/fake/credentials.json&#39;)</code></pre>
+<p>When you run this command, the function will…<br />
+(1) first ask for confirmation that you want to continue, after showing
+you a list of the grades that would be shared.<br />
+(2) ask for you to select/authorize the email account you want to use to
+send the email. (3) then send each email, printing a confirmation to the
+Console with each email sent.</p>
+<p>The email will have a subject line that specifies which
+<code>assignment_id</code> this grade is for, and it will contain the
+PDF of the graded rubric (with written feedback, if you provided any) as
+an attachment. If the student is exempted from the assignment, the
+<code>exempt_body</code> input will be used instead of the
+<code>email_body</code> input.</p>
+<p>After the loop is complete, re-run the <code>view_unshared()</code>
+command above to ensure that no more grades need to be shared.</p>
+<p> </p>
+</div>
+</div>
+<div id="generate-summary-reports" class="section level3">
+<h3>Generate summary reports</h3>
+<p>text</p>
+<pre class="r"><code>#chunk</code></pre>
+<p> </p>
+<div id="student-reports" class="section level4">
+<h4>Student reports</h4>
+<pre class="r"><code>render_student(&#39;ENST_338&#39;,
+               &#39;Cassie&#39;,
+               to_file = FALSE,
+               gg_height = 8)</code></pre>
+<p>Sending out student reports</p>
+<pre class="r"><code>email_student_reports(course_id = &#39;ENST_338&#39;,
+                      json_path = &#39;/Users/ekezell/repos/credentials/desktop_gradebook.json&#39;)</code></pre>
+<p> </p>
+</div>
+<div id="class-reports" class="section level4">
+<h4>Class reports</h4>
+<p>text</p>
+<pre class="r"><code>final_grades &lt;-
+  render_class(&#39;ENST_338&#39;,
+               letter_key = &#39;default&#39;)
+
+final_grades$plot
+final_grades$grades %&gt;%
+  select(student, last_name, letter, current_grade) %&gt;%
+  arrange(last_name)</code></pre>
+<p> </p>
+</div>
+</div>
+<div id="conclusion-putting-it-all-together" class="section level3">
+<h3>Conclusion: Putting it all together</h3>
+<p>Once you get to this point of <code>gradebook</code> setup, in which
+your course is setup with all its assignments and roster and you have
+the email features operational, you are ready to settle into the grading
+routine of the semester. For me, that workflow routine tends to involve
+these steps.</p>
+<ol style="list-style-type: decimal">
+<li><p>Make sure <code>gradebook</code> is loaded and your working
+directory is set to your grading folder.</p></li>
+<li><p>Run <code>grade()</code> to grade new submissions, checking the
+PDFs being saved into <code>&lt;course_id&gt;/reports/grades</code> to
+review formatting, and adjusting PDF formatting settings within the
+grading app as needed.</p></li>
+<li><p>Check <code>view_unshared()</code> to see which grades need to be
+emailed out.</p></li>
+<li><p>Run <code>email_grades()</code> to send out emails.</p></li>
+<li><p>Every once and a while, review the current grade distribution of
+the class (<code>render_class()</code>).</p></li>
+<li><p>When students meet with me or write to inquire about their grade,
+I check their grade history with <code>render_student()</code>. Two
+weeks before mid-term and again before the end of term, email out grade
+reports so that students know where they stand and can check my work for
+issues or mistakes.</p></li>
+</ol>
+<p>This workflow is supported by two <code>R</code> files for each
+course:</p>
+<p> </p>
+<div id="grade.r" class="section level4">
+<h4><strong><code>grade.R</code></strong></h4>
+<p>This is the R file I keep open and use regularly for grading</p>
+<pre class="r"><code>###############################################################################
+# grade.R
+###############################################################################
+
+# Update gradebook
+remotes::install_github(&quot;ericmkeen/gradebook&quot;)
+library(gradebook)
+
+# Ensure working directory is set to grading folder
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+
+# Set course ID
+course_id &lt;- &#39;ENST_338&#39;
+#setup_course(course_id)
+
+# Students
+students_url &lt;- &#39;https://docs.google.com/spreadsheets/d/1ISxHeEM-noYGNAAG-BEt0zQek94EAX4SZMuwgFXXqew/edit?usp=sharing&#39;
+update_roster(&#39;ENST_338&#39;, students_url) # rerun this each time your googlesheet is changed
+
+# Quick view of students
+view_students(&#39;ENST_338&#39;) %&gt;% as.data.frame
+view_students(&#39;ENST_338&#39;) %&gt;% pull(goes_by)
+
+# Get email-ready list of students
+paste(view_students(&#39;ENST_338&#39;)$email, collapse=&#39;, &#39;)
+
+
+################################################################################
+################################################################################
+# Grade &amp; manage
+
+# Grade
+grade()
+
+# Reading assignments
+grade(wrap_rubric = 40, pdf_height = 5)
+
+# Print submitted reading assignments to Console for review
+form_url &lt;- &#39;https://docs.google.com/spreadsheets/d/1Zff8Ds--Yu4xPiVSLe4YV-3IZxwkpdX56LJjBXHQA1A/edit?usp=sharing&#39;
+review_google_form(view_students(&#39;ENST_421&#39;),
+                   form_url)
+
+# First case study / deep dive  ================================================
+
+grade(greeting = &quot;Dear STUDENT,\n\Great presentation! Thank you so much for leading the group into this part of the course with such a strong example.\n&quot;,
+      conclusion = &quot;\nThank you again, STUDENT.\n\nProf. Ezell&quot;,
+      wrap_rubric = 50,
+      wrap_notes = 100,
+      render_ratio = 5,
+      pdf_height = 15)
+
+
+# QA/QC ========================================================================
+
+view_assignments(&#39;ENST_338&#39;) # View simple list of assignments
+view_status(&#39;ENST_338&#39;) # get a master list of all assignments on file and the grades that are already complete.
+view_missing(&#39;ENST_338&#39;, mode = &#39;simple&#39;) #%&gt;% tail # are any students without a grade for an assignment that was already due?
+render_grades(&#39;ENST_338&#39;) # Re-render grade reports in a batch, if needed (helpful it modifying the ggplot code)
+
+render_grades(&#39;ENST_338&#39;,
+              &#39;Presentation&#39;,
+              render_ratio =  4,
+              pdf_height = 7) # Re-render grade reports in a batch, if needed (helpful it modifying the ggplot code)
+
+view_missing(&#39;ENST_338&#39;, mode = &#39;simple&#39;) %&gt;% filter(goes_by == &#39;Adam&#39;)
+
+# Share grades =================================================================
+
+view_unshared(&#39;ENST_338&#39;) # Return which grades have not yet been shared
+
+# email_test(recipient = &#39;ekezell@sewanee.edu&#39;,
+#            json_path = &#39;/Users/ekezell/repos/credentials/desktop_gradebook.json&#39;)
+
+email_grades(course_id = &#39;ENST_338&#39;,
+             unshared_only = TRUE,
+             your_email = &#39;ekezell@sewanee.edu&#39;,
+             json_path = &#39;/Users/ekezell/repos/credentials/desktop_gradebook.json&#39;)
+
+# Custom body - super basic
+email_grades(course_id = &#39;ENST_338&#39;,
+             unshared_only = TRUE,
+             your_email = &#39;ekezell@sewanee.edu&#39;,
+             email_body =
+               &quot;Attached you will find your grade on this assignment.\n\nBest wishes,\nProf. Ezell&quot;,
+             json_path = &#39;/Users/ekezell/repos/credentials/desktop_gradebook.json&#39;)
+
+# Custom body -- final essay
+email_grades(course_id = &#39;ENST_338&#39;,
+             unshared_only = TRUE,
+             your_email = &#39;ekezell@sewanee.edu&#39;,
+             email_body =
+               &quot;Huzzah! The last and final email from me for ENST 101! At long last!\n\nAttached you will find your grade on the final essay. As I state in my feedback at the bottom of the rubric, I am so grateful for your work this semester. I look forward to staying in touch!\n\nBest wishes,\nProf. Ezell&quot;,
+             json_path = &#39;/Users/ekezell/repos/credentials/desktop_gradebook.json&#39;)
+
+# Reports ======================================================================
+
+# Report for a single student
+render_student(&#39;ENST_338&#39;,
+               &#39;Cassie&#39;,
+               to_file = FALSE,
+               gg_height = 8)
+
+# Reports for all students
+render_students(&#39;ENST_101&#39;,
+                gg_height = 8,
+                to_file = TRUE)
+
+# Email reports
+email_student_reports(course_id = &#39;ENST_338&#39;,
+                      json_path = &#39;/Users/ekezell/repos/credentials/desktop_gradebook.json&#39;)
+
+# Final grades
+final_grades &lt;-
+  render_class(&#39;ENST_338&#39;,
+               letter_key = &#39;default&#39;)
+
+final_grades$plot
+final_grades$grades %&gt;%
+  select(student, last_name, letter, current_grade) %&gt;%
+  arrange(last_name)
+
+################################################################################
+################################################################################</code></pre>
+<p> </p>
+</div>
+<div id="setup.r" class="section level4">
+<h4><strong><code>setup.R</code></strong></h4>
+<p>This is the <code>R</code> file within the course folder, which you
+use to encode instructions for each assignment.</p>
+<pre class="r"><code>###############################################################################
+# setup.R
+###############################################################################
+
+# Set course ID
+course_id &lt;- &#39;ENST_338&#39;
+
+data(grade_scale1) ; grade_scale1
+data(grade_scale2) ; grade_scale2
+data(grade_scale3) ; grade_scale3
+
+grade_scale4 &lt;- grade_scale3
+grade_scale4$percent &lt;- c(60, 75, 90)
+grade_scale4
+
+# Weekly work - Abstracts ======================================================
+
+ass_cat &lt;- &#39;Weekly work&#39;
+out_of &lt;- 4
+
+(ww_rubric &lt;- list(&#39;&lt;b&gt;Truly a distillation:&lt;/b&gt; not an outline or preview of what the reading contains, but a proper summary.&#39; = grade_scale1,
+                   &#39;Details make clear that the &lt;b&gt;entire reading was read carefully.&lt;/b&gt;&#39; = grade_scale1,
+                   &#39;&lt;b&gt;All important aspects&lt;/b&gt; of the reading are covered properly within the word-limit constraints&#39; = grade_scale4,
+                   &#39;&lt;b&gt;Writing&lt;/b&gt; is compelling, effective, efficient.&#39; = grade_scale4,
+                   &quot;Within the &lt;b&gt;word limit.&lt;/b&gt;&quot;=grade_scale4,
+                   &#39;&lt;b&gt;Adherence to instructions overall.&lt;/b&gt;&#39; = grade_scale4))
+
+assignment(course_id = course_id,                     assignment_id = &#39;Week 03 Abstract&#39;,
+           assignment_category = ass_cat, out_of = out_of, due_date = &#39;2024-02-01&#39;,
+           share = TRUE, rubric = ww_rubric)
+
+assignment(course_id = course_id,                     assignment_id = &#39;Week 04 Abstract&#39;,
+           assignment_category = ass_cat, out_of = out_of, due_date = &#39;2024-02-08&#39;,
+           share = TRUE, rubric = ww_rubric)
+
+assignment(course_id = course_id,                     assignment_id = &#39;Week 05 Abstract&#39;,
+           assignment_category = ass_cat, out_of = out_of, due_date = &#39;2024-02-15&#39;,
+           share = TRUE, rubric = ww_rubric)
+
+assignment(course_id = course_id,                     assignment_id = &#39;Week 06 Abstract&#39;,
+           assignment_category = ass_cat, out_of = out_of, due_date = &#39;2024-02-22&#39;,
+           share = TRUE, rubric = ww_rubric)
+
+assignment(course_id = course_id,                     assignment_id = &#39;Week 10 Abstract&#39;,
+           assignment_category = ass_cat, out_of = out_of, due_date = &#39;2024-03-21&#39;,
+           share = TRUE, rubric = ww_rubric)
+
+assignment(course_id = course_id,                     assignment_id = &#39;Week 11 Abstract&#39;,
+           assignment_category = ass_cat, out_of = out_of, due_date = &#39;2024-03-28&#39;,
+           share = TRUE, rubric = ww_rubric)
+
+assignment(course_id = course_id,                     assignment_id = &#39;Week 12 Abstract&#39;,
+           assignment_category = ass_cat, out_of = out_of, due_date = &#39;2024-04-04&#39;,
+           share = TRUE, rubric = ww_rubric)
+
+assignment(course_id = course_id,                     assignment_id = &#39;Week 13 Abstract&#39;,
+           assignment_category = ass_cat, out_of = out_of, due_date = &#39;2024-04-11&#39;,
+           share = TRUE, rubric = ww_rubric)
+
+assignment(course_id = course_id,                     assignment_id = &#39;Week 14 Abstract&#39;,
+           assignment_category = ass_cat, out_of = out_of, due_date = &#39;2024-04-18&#39;,
+           share = TRUE, rubric = ww_rubric)
+
+# Weekly work - Discussion Q&amp;A ======================================================
+
+ass_cat &lt;- &#39;Weekly work&#39;
+out_of &lt;- 4
+rq_rubric &lt;- NULL
+
+(ww_rubric &lt;- list(&#39;&lt;b&gt;Discussion question&lt;/b&gt; is thoughtful, thought-provoking, original, and creative.&#39; = grade_scale4,
+                   &#39;&lt;b&gt;Response to discussion question&lt;/b&gt; is thoughtful, thought-provoking, original, and creative.&#39; = grade_scale1,
+                   &#39;Details make clear that the &lt;b&gt;entire reading was read carefully.&lt;/b&gt;&#39; = grade_scale1,
+                   &#39;&lt;b&gt;Many different important aspects&lt;/b&gt; of the reading are touched on throughout the answer.&#39; = grade_scale1,
+                   &#39;&lt;b&gt;Writing&lt;/b&gt; is compelling, effective, efficient.&#39; = grade_scale4,
+                   &quot;Within the &lt;b&gt;word limit.&lt;/b&gt;&quot;=grade_scale4,
+                   &#39;&lt;b&gt;Adherence to instructions overall.&lt;/b&gt;&#39; = grade_scale4))
+
+assignment(course_id = course_id,                     assignment_id = &#39;Week 03 Discussion Q&amp;A&#39;,
+           assignment_category = ass_cat, out_of = out_of, due_date = &#39;2024-02-01&#39;,
+           share = TRUE, rubric = ww_rubric)
+
+assignment(course_id = course_id,                     assignment_id = &#39;Week 04 Discussion Q&amp;A&#39;,
+           assignment_category = ass_cat, out_of = out_of, due_date = &#39;2024-02-08&#39;,
+           share = TRUE, rubric = ww_rubric)
+
+assignment(course_id = course_id,                     assignment_id = &#39;Week 05 Discussion Q&amp;A&#39;,
+           assignment_category = ass_cat, out_of = out_of, due_date = &#39;2024-02-15&#39;,
+           share = TRUE, rubric = ww_rubric)
+
+assignment(course_id = course_id,                     assignment_id = &#39;Week 06 Discussion Q&amp;A&#39;,
+           assignment_category = ass_cat, out_of = out_of, due_date = &#39;2024-02-22&#39;,
+           share = TRUE, rubric = ww_rubric)
+
+assignment(course_id = course_id,                     assignment_id = &#39;Week 10 Discussion Q&amp;A&#39;,
+           assignment_category = ass_cat, out_of = out_of, due_date = &#39;2024-03-21&#39;,
+           share = TRUE, rubric = ww_rubric)
+
+assignment(course_id = course_id,                     assignment_id = &#39;Week 11 Discussion Q&amp;A&#39;,
+           assignment_category = ass_cat, out_of = out_of, due_date = &#39;2024-03-28&#39;,
+           share = TRUE, rubric = ww_rubric)
+
+assignment(course_id = course_id,                     assignment_id = &#39;Week 12 Discussion Q&amp;A&#39;,
+           assignment_category = ass_cat, out_of = out_of, due_date = &#39;2024-04-04&#39;,
+           share = TRUE, rubric = ww_rubric)
+
+assignment(course_id = course_id,                     assignment_id = &#39;Week 13 Discussion Q&amp;A&#39;,
+           assignment_category = ass_cat, out_of = out_of, due_date = &#39;2024-04-11&#39;,
+           share = TRUE, rubric = ww_rubric)
+
+assignment(course_id = course_id,                     assignment_id = &#39;Week 14 Discussion Q&amp;A&#39;,
+           assignment_category = ass_cat, out_of = out_of, due_date = &#39;2024-04-18&#39;,
+           share = TRUE, rubric = ww_rubric)
+
+
+# Presentations ================================================================
+
+asscat &lt;- &#39;Presentations&#39;
+
+rubric &lt;- list(&#39;Substance&#39; = &#39;category&#39;,
+               &#39;&lt;b&gt;A strategic and well-crafted distillation/synthesis&lt;/b&gt; of the material.&#39; = grade_scale1,
+               &#39;Details make it clear that &lt;b&gt;all materials were studied closely and incorporated closely.&lt;/b&gt;&#39; = grade_scale4,
+               &#39;&lt;b&gt;All important aspects&lt;/b&gt; of the reading are covered properly within the word-limit constraints&#39; = grade_scale4,
+               &#39;&lt;b&gt;Story &amp; narrative:&lt;/b&gt; the talk takes the form of a story, taking the audience on a shared journey. Anecdotes, characters, plot twists, and heart are used throughout&#39; = grade_scale1,
+               &#39;&lt;b&gt;Organization overall&lt;/b&gt; is intuitive &amp; clear for the audience.&#39; = grade_scale1,
+               &#39;&lt;b&gt;First moments:&lt;/b&gt; Excellent, engaging, memorable &amp; relevant attention getter, setting the tone for the entire talk.&#39; = grade_scale1,
+               &#39;&lt;b&gt;Compelling justification:&lt;/b&gt; The audience is made to care about the issue &amp; context first, &lt;b&gt;before any mention&lt;/b&gt; of research or science&#39; = grade_scale1,
+               &#39;&lt;b&gt;Final moments:&lt;/b&gt; clear &amp; memorable summary of points; refers back to thesis/proposed project. Ends with strong take-away/punchline.&#39; = grade_scale1,
+               &#39;Delivery&#39; = &#39;category&#39;,
+               &#39;&lt;b&gt;Preparation:&lt;/b&gt; clearly well-prepared, evident in the timing of the talk, familiarity with visual aids and what will be said; no reading off slides.&#39; = grade_scale4,
+               &#39;&lt;b&gt;Time allocation:&lt;/b&gt; delivered within the allocated time window; time within the talk is allocated strategically. &#39; = grade_scale4,
+               &#39;All group members &lt;b&gt;share speaking load equally&lt;/b&gt;.&#39; = grade_scale4,
+               &#39;&lt;b&gt;Speech:&lt;/b&gt; conversational, sincere, dynamic &amp; compelling; good pace of speech; no trailing off or rambling; no vocal fillers; impactful use of pauses.&#39; = grade_scale1,
+               &#39;&lt;b&gt;Language:&lt;/b&gt; can articulate meaning clearly through eloquent word choice &amp; premeditated sentences; no unexplained jargon, abbreviations or acronyms.&#39; = grade_scale1,
+               &#39;&lt;b&gt;Explanation:&lt;/b&gt; Any word/concept that may not be understood is explained, either explicitly or within abundant context, at a level appropriate to audience.&#39; = grade_scale4,
+               &#39;&lt;b&gt;Non-verbal delivery:&lt;/b&gt; The “Second Conversation”: Attire, composure, &amp; body language reflect sincerity &amp; professionalism, without sacrificing authenticity.&#39; = grade_scale1,
+               &#39;&lt;b&gt;Mistakes:&lt;/b&gt; mistakes are handled in a graceful &amp; self-forgiving manner; recovery is quick.&#39; = grade_scale1,
+               &#39;&lt;b&gt;Energetic, relatable, genuine, poised, confident but vulnerable, at ease&lt;/b&gt;&#39; = grade_scale1,
+               &#39;Visual aids&#39; = &#39;category&#39;,
+               &#39;&lt;b&gt;Strategic use:&lt;/b&gt; redundancy (if any) between what is spoken and what is displayed is strategic, not used as a crutch for presenting.&#39; = grade_scale4,
+               &#39;&lt;b&gt;Design &amp; display:&lt;/b&gt; of professional quality, not sloppy or thrown together. Aids prioritize simplicity, clarity, and good design.&#39; = grade_scale4,
+               &#39;&lt;b&gt;Text is sparse&lt;/b&gt;; no more than 6 bullet points of large text, each spanning one line or less.&#39; = grade_scale4,
+               &#39;Any &lt;b&gt;data visualization&lt;/b&gt; has been reduced to the simplest possible form, or explained accordingly.&#39; = grade_scale4)
+
+out_of &lt;- 12
+
+assignment(course_id = course_id, assignment_category = asscat,
+           assignment_id = &#39;Group case study 1&#39;,
+           out_of = out_of,
+           due_date = &#39;2024-03-05&#39;,
+           share = TRUE, rubric = rubric)
+
+assignment(course_id = course_id, assignment_category = asscat,
+           assignment_id = &#39;Group case study 2&#39;,
+           out_of = out_of,
+           due_date = &#39;2024-04-30&#39;,
+           share = TRUE, rubric = rubric)
+
+assignment(course_id = course_id, assignment_category = asscat,
+           assignment_id = &#39;Group deep dive 1&#39;,
+           out_of = out_of,
+           due_date = &#39;2024-03-05&#39;,
+           share = TRUE, rubric = rubric)
+
+assignment(course_id = course_id, assignment_category = asscat,
+           assignment_id = &#39;Group deep dive 2&#39;,
+           out_of = out_of,
+           due_date = &#39;2024-04-30&#39;,
+           share = TRUE, rubric = rubric)
+
+assignment(course_id = course_id, assignment_category = asscat,
+           assignment_id = &#39;Solo talk 1&#39;,
+           out_of = out_of,
+           due_date = &#39;2024-03-05&#39;,
+           share = TRUE, rubric = rubric)
+
+assignment(course_id = course_id, assignment_category = asscat,
+           assignment_id = &#39;Solo talk 2 &#39;,
+           out_of = out_of,
+           due_date = &#39;2024-04-30&#39;,
+           share = TRUE, rubric = rubric)
+
+# Group interviews =============================================================
+
+(rubric &lt;- list(&#39;&lt;b&gt;Making meaning, earnest effort, challenging yourself&lt;/b&gt;&#39; = grade_scale3,
+                &#39;&lt;b&gt;Ask or engage with speaker at least once&lt;/b&gt;&#39; = grade_scale3,
+                &quot;&lt;b&gt;Respectful of other listeners, not crowding out anyone else&#39;s voice&lt;/b&gt;&quot; = grade_scale3,
+                &#39;&lt;b&gt;Engaged &amp; attentive listener.&lt;/b&gt;&#39; = grade_scale3))
+
+out_of &lt;- 3
+
+assignment(course_id = course_id, assignment_category = &#39;Expert interviews&#39;,
+           assignment_id = &#39;Chris Picard&#39;,
+           out_of = out_of,
+           due_date = &#39;2024-02-08&#39;,
+           share = TRUE, rubric = rubric)
+
+assignment(course_id = course_id, assignment_category = &#39;Expert interviews&#39;,
+           assignment_id = &#39;Jonathan Meiburg&#39;,
+           out_of = out_of,
+           due_date = &#39;2024-02-22&#39;,
+           share = TRUE, rubric = rubric)
+
+assignment(course_id = course_id, assignment_category = &#39;Expert interviews&#39;,
+           assignment_id = &#39;Anne Simonis&#39;,
+           out_of = out_of,
+           due_date = &#39;2024-03-21&#39;,
+           share = TRUE, rubric = rubric)
+
+assignment(course_id = course_id, assignment_category = &#39;Expert interviews&#39;,
+           assignment_id = &#39;Joe YSR&#39;,
+           out_of = out_of,
+           due_date = &#39;2024-04-16&#39;,
+           share = TRUE, rubric = rubric)
+
+assignment(course_id = course_id, assignment_category = &#39;Expert interviews&#39;,
+           assignment_id = &#39;Barb Taylor&#39;,
+           out_of = out_of,
+           due_date = &#39;2024-04-18&#39;,
+           share = TRUE, rubric = rubric)
+
+assignment(course_id = course_id, assignment_category = &#39;Expert interviews&#39;,
+           assignment_id = &#39;Coral Theology&#39;,
+           out_of = out_of,
+           due_date = &#39;2024-04-23&#39;,
+           share = TRUE, rubric = rubric)
+
+
+# Final essay ==================================================================
+
+(final_rubric &lt;- list(&#39;&lt;b&gt;Making meaning, earnest effort, challenging yourself&lt;/b&gt;&#39; = grade_scale1,
+                      &#39;&lt;b&gt;Profound, informed, nuanced, and courageous engagement&lt;/b&gt; with the semester of material.&#39; = grade_scale1,
+                     &#39;&lt;b&gt;Clear, coherent, &amp; compelling organization,&lt;/b&gt; guided by a single central idea/thesis and framework.&#39; = grade_scale1,
+                     &#39;&lt;b&gt;All supporting content is presented well &amp; clearly.&lt;/b&gt; Reason is balanced with stories of the human heart.&#39; = grade_scale1,
+                     &#39;&lt;b&gt;At least 10 case studies and 10 deep-dive papers&lt;/b&gt; are discussed and referenced as part of the supporting material for your framework.&#39; = grade_scale1,
+                     &#39;&lt;b&gt;Concepts are explained well &amp; clearly,&lt;/b&gt; with attention to word-choice and order of ideas.&#39; = grade_scale4,
+                     &#39;&lt;b&gt;Writing is concise, exact, &amp; clear.&lt;/b&gt; Conceptual flow is intuitive &amp; straightforward.&#39; = grade_scale1,
+                     &#39;&lt;b&gt;Paragraphs are short&lt;/b&gt; (no more than 11 lines), focused on a single subjet, with a clear purpose statement.&#39; = grade_scale4,
+                     &#39;&lt;b&gt;Writing is polished and error-free.&lt;/b&gt;&#39; = grade_scale4,
+                     &#39;&lt;b&gt;Adherence to instructions.&lt;/b&gt;&#39; = grade_scale4))
+
+assignment(course_id = course_id,
+           assignment_category = &#39;Final essay&#39;,
+           assignment_id = &#39;Final essay&#39;,
+           out_of = 18,
+           due_date = &#39;2024-05-05&#39;,
+           share = TRUE,
+           extra_credit = FALSE,
+           rubric = final_rubric)
+
+
+################################################################################
+################################################################################
+# Syllabus prep
+################################################################################
+################################################################################
+
+plot_assignment_calendar(course_id)
+
+plot_assignment_weights(course_id)</code></pre>
+</div>
 </div>
 
 
