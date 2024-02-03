@@ -11,7 +11,31 @@ knitr::opts_chunk$set(echo = TRUE)
 
 &nbsp;  
 
-Introductory ideas
+The `gradebook` package is designed to be a one-stop-shop for managing grades for an academic course. It was designed for use in courses at a liberal arts college, but it can theoretically be applied to any academic setting. The package was designed to reduce the workload, time-costs, paper waste, and administrative burden of grading.  
+ 
+Note that `gradebook` is currently in **`BETA`** release only, and the package creators do not guarantee flawless performance or take responsibility for any mistakes that may result from use of `gradebook`.  
+
+
+### Workflow overview
+
+When using `gradebook`, the overall grading workflow for a course looks something like this: 
+
+**Before the semester begins:** 
+1. Install the `gradebook` package.
+2. Setup your course directory. 
+3. Setup details for all of your course's assignments. 
+4. Summarize the calendar of assignments calendar and their relative weights for your syllabus. 
+5. Setup the roster of students registered for your course. 
+
+**For each assignment during the semester:**
+6. Grade submissions and save PDF grade reports using an interactive app. 
+7. Share grades with students via email. 
+8. Repeat for next assignment! 
+
+**At mid-term and end-of-term:**. 
+9. Share grade reports with each student to ensure students are aware of their progress and any missing assignments. 
+10. Quickly calculate mid-term and final grades.  
+
 
 &nbsp;  
 
@@ -44,35 +68,44 @@ library(shiny)
 library(rstudioapi)
 ```
 
-&nbsp;  
-
-### Workflow overview
-
-text
+Note that `gradebook` is currently in **`BETA`** release only, and the package creators do not guarantee flawless performance or take responsibility for any mistakes that may result from use of `gradebook`.  
 
 &nbsp;  
 
 ### Setup a course
 
-text
+To setup a course for grading with `gradebook`, set the `R` working directory to an empty folder where you want to keep your grade files. Open an `R` script and name it something simple like `grade_enst338.R` (ENST 338 is the name of the course we will use as an example throughout this vignette).  
+
+At the top of that script, load the `gradebook` package...
 
 ```{r echo=TRUE, eval=FALSE, warning=FALSE, message=FALSE, fig.width = 6, fig.height=6}
-setup_course(course_id)
+library(gradebook)
 ```
+
+... then run this command (replacing the `course_id` input with the name of your own course):  
+
+```{r echo=TRUE, eval=FALSE, warning=FALSE, message=FALSE, fig.width = 6, fig.height=6}
+setup_course(course_id = 'ENST_338')
+```
+
+You only ever need to do this *ONCE* for each course. After you run this line, I suggest commenting it out with a `#`.    
+
+After running this line, you can navigate to your working directory and see that a directory of folders has been created. 
+
+**ADD IMAGE HERE**  
+
+We will cover the purpose for each of these folders throughout this tutorial. For now, open up the `setup_<course_id>.R` file that has been created within your `<course_id>` directory.  
+
+**You now have two `R` scripts open:** `grade_<course_id>.R` and `setup_<course_id>.R`. These are the only two files you will need for setting up your course in `gradebook`. In the `setup` script you will specify all the details for your assignments, so this is where you will do most of your work *before* the semester begins.  Once the semester begins and you are actively managing student rosters and grading assignments, you will be doing all of your work within the `grade` script. 
+
+The next several steps will take place within your `setup` script.  
 
 &nbsp;  
 
-#### Course directory
-
-text
-
-```{r echo=TRUE, eval=FALSE, warning=FALSE, message=FALSE, fig.width = 6, fig.height=6}
-#chunk
-```
-
-&nbsp;  
 
 ### Setup assignments
+
+Write your code for setting up assignments within your `setup_<course_id>.R` script.  
 
 Every graded assignment in the course needs to have details on file. To add an assignment to the course, use the function `assignment()`.  
 
@@ -89,7 +122,7 @@ assignment(course_id = 'ENST_338',
 
 When this command is run, an `.RData` file with the assignment details is saved to `<course_id>/assignments/`.  
 
-Note that `assignment_id` must be unique to all other assignment IDs.  
+Note that `assignment_id` must be unique to all other `assignment_id`'s, even across `assignment_category`'s.  
 
 Also note that the `due_date` input needs to follow the format shown here: `yyyy-mm-dd`.  
 
@@ -168,7 +201,7 @@ nbsp;
 
 **Bold text:** To highlight certain text within the rubric in bold, use the `HTML` tags `<b>` and `</b>`.  See the example below.  
 
-*Example of a rubric with advanced formatting, for a group presentation assignment:*.   
+*Here is an example of a long, complex rubric with categories as well as advanced formatting, for a group presentation assignment:*.   
 
 ```{r echo=TRUE, eval=FALSE, warning=FALSE, message=FALSE, fig.width = 6, fig.height=6}
 rubric <- list('Substance' = 'category',
@@ -180,6 +213,7 @@ rubric <- list('Substance' = 'category',
                '<b>First moments:</b> Excellent, engaging, memorable & relevant attention getter, setting the tone for the entire talk.' = grade_scale1,
                '<b>Compelling justification:</b> The audience is made to care about the issue & context first, <b>before any mention</b> of research or science' = grade_scale1,
                '<b>Final moments:</b> clear & memorable summary of points; refers back to thesis/proposed project. Ends with strong take-away/punchline.' = grade_scale1,
+               
                'Delivery' = 'category',
                '<b>Preparation:</b> clearly well-prepared, evident in the timing of the talk, familiarity with visual aids and what will be said; no reading off slides.' = grade_scale4,
                '<b>Time allocation:</b> delivered within the allocated time window; time within the talk is allocated strategically. ' = grade_scale4,
@@ -190,6 +224,7 @@ rubric <- list('Substance' = 'category',
                '<b>Non-verbal delivery:</b> The “Second Conversation”: Attire, composure, & body language reflect sincerity & professionalism, without sacrificing authenticity.' = grade_scale1,
                '<b>Mistakes:</b> mistakes are handled in a graceful & self-forgiving manner; recovery is quick.' = grade_scale1,
                '<b>Energetic, relatable, genuine, poised, confident but vulnerable, at ease</b>' = grade_scale1,
+               
                'Visual aids' = 'category',
                '<b>Strategic use:</b> redundancy (if any) between what is spoken and what is displayed is strategic, not used as a crutch for presenting.' = grade_scale4,
                '<b>Design & display:</b> of professional quality, not sloppy or thrown together. Aids prioritize simplicity, clarity, and good design.' = grade_scale4,
@@ -201,7 +236,7 @@ rubric <- list('Substance' = 'category',
 
 #### Replicate similar assignments
 
-You may have an assignment that will be repeated several times throughout the semester, such as a weekly reading assignment.  Each individual deadline needs to have its own assignment on file, but you can expedite the coding of all those assignments using a loop. Here is an example:  
+You may have an assignment that will be repeated several times throughout the semester, such as a weekly reading assignment or discussion exercise.  Each individual deadline needs to have its own assignment on file, but you can expedite the coding of all those assignments using a loop. Here is an example:  
 
 ```{r echo=TRUE, eval=FALSE, warning=FALSE, message=FALSE, fig.width = 6, fig.height=6}
 deadlines <- c('2024-01-22',
@@ -216,6 +251,7 @@ for(i in 1:length(deadlines)){
              assignment_id = paste0('Week ', i,': Group discussion'),
              out_of = 10,
              due_date = due_dates[i]
+             extra_credit = FALSE,
              share = TRUE, 
              rubric = NULL)
 }
@@ -245,6 +281,7 @@ Once each and every one of your assignments for the semester is on file, you can
 plot_assignment_weights(course_id)
 ```
 
+*Example output:*
 **ADD IMAGE HERE**  
 
 &nbsp;  
@@ -255,6 +292,7 @@ plot_assignment_weights(course_id)
 plot_assignment_calendar(course_id)
 ```
 
+*Example output:*
 **ADD IMAGE HERE**  
 
 
@@ -262,19 +300,33 @@ plot_assignment_calendar(course_id)
 
 ### Setup student roster
 
-Now that assignments are setup, it's time for students to register for your class! Once registration has occurred, you are ready to setup your course roster.  
+Now that assignments are setup, you should be done working with your `setup_<course_id>.R` file, and you should start building up code in your `grade_<course_id>.R` file.  (You can always return to your `setup` script and update assignments as needed, but your routine work in that script should be done for now.).  
 
-The first step is creating a `GoogleSheet` with info for enrolled students.  
+It is also time to start working it's time for students to register for your class! Once registration has occurred, you are ready to setup your course roster.  
+
+The first step is creating a `GoogleSheet` with info for enrolled students.  This `GoogleSheet` has four mandatory columns: `goes_by` (the name the student goes by -- must be unique to all other namees in course!), `first` (first name), `last` (last name), and `email` (email address).  You are welcome to add other columns to this `GoogleSheet`, but those extra columns will be ignored and all four of those just mentioned must be included. 
+
+**ADD IMAGE HERE**  
+
+Make sure that the sheet's Sharing Settings are set to "Anyone with the link can view", then copy the sharing link to paste into your `R` script (remember, we are working within the `grade_<course_id>.R` script from now on.  
 
 
-```{r echo=TRUE, eval=FALSE, warning=FALSE, message=FALSE, fig.width = 6, fig.height=6}
+```{r echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE, fig.width = 6, fig.height=6}
 students_url <- 'https://docs.google.com/spreadsheets/d/1ISxHeEM-noYGNAAG-BEt0zQek94EAX4SZMuwgFXXqew/edit?usp=sharing'
 update_roster('ENST_338', students_url) # rerun this each time your googlesheet is changed
 ```
 
-Get email-ready list of students
+The function `update_roster()` will download the `GoogleSheet` contents and save a local version of it within your `<course_id>` directory.  Be sure to rerun `update_roster()` each time your `GoogleSheet` is changed.  
 
-```{r echo=TRUE, eval=FALSE, warning=FALSE, message=FALSE, fig.width = 6, fig.height=6}
+To get a quick view of the students on your roster for a course, use the function `view_students()`: 
+
+```{r echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE, fig.width = 6, fig.height=6}
+view_students('ENST_338')
+```
+
+This is a handy tool for prepping a set of email recipients if you wish to email your entire class. For example, you can copy the output of this command:  
+
+```{r echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE, fig.width = 6, fig.height=6}
 paste(view_students('ENST_338')$email, collapse=', ')
 ```
 
@@ -282,22 +334,77 @@ paste(view_students('ENST_338')$email, collapse=', ')
 
 ### Grading
 
-text
+The function `grade()` launches a `Shiny` app that lets you grade submissions.
 
 ```{r echo=TRUE, eval=FALSE, warning=FALSE, message=FALSE, fig.width = 6, fig.height=6}
-# Grade
 grade()
+```
 
-# Reading assignments
-grade(wrap_rubric = 40, pdf_height = 5)
+The app should look similar to the image below, with options in the left sidebar for selecting the course, assignment, and student to grade:  
 
-# Print submitted reading assignments to Console for review
-form_url <- 'https://docs.google.com/spreadsheets/d/1Zff8Ds--Yu4xPiVSLe4YV-3IZxwkpdX56LJjBXHQA1A/edit?usp=sharing'
-review_google_form(view_students('ENST_421'),
-                   form_url)
+**ADD IMAGE HERE**  
 
-# First case study / deep dive  ================================================
+Once the assignment & student are selected, the grading rubric will appear in the main panel on the right: 
 
+**ADD IMAGE HERE**  
+
+Adjust the sliders on the rubric to provide your assessment, then press **Save grade**.  A notification will appear confirming that the grade was saved.  You can then proceed to the next student's assessment.  
+
+Each grade is saved as an individual `.RData` file in the folder `<course_id>/grades`. Go check it out.  
+
+Each grade is also saved as a PDF report of the graded rubric. You can find those renderings in `<course_id>/reports/grades`.
+
+*An example of a PDF grade report:*  
+**ADD IMAGE HERE**  
+
+
+#### Adjusting grade report dimensions  
+
+With each new assignment, you will likely want to adjust the dimensions of the PDF report that is generated. Assignments with longer rubrics will need taller PDFs in order to avoid text overcrowding.  
+
+The `grade()` function accepts inputs for adjusting these dimensions. The main two are `wrap_rubric` and `pdf_height`.  
+
+```{r echo=TRUE, eval=FALSE, warning=FALSE, message=FALSE, fig.width = 6, fig.height=6}
+grade(wrap_rubric = 40, 
+      pdf_height = 5)
+```
+
+`wrap_rubric` defines how wide lines (in terms of number of characters) should be in each rubric standard. A larger number means wider width, which may allow the PDF to have the same height without overcrowding. `pdf_height` defines the height of the PDF, in inches.  You can also adjust these settings within the `grade()` app using the sliders at the bottom of the left side panel.  
+
+**Suggested workflow:** To settle on an appropriate PDF size for a given assignment, I typically grade one assignment using the `grade()` defaults, checkout the PDF file, make adjustments within the app using the sliders, re-save the grade (a warning will appear that a grade is already on file for this student-assignment; simply confirm to overwrite the pre-existing grade), and iterate until I am satisfied with the settings. I then make a note of the correct settings for this type of assignment in my `R` script. For example: 
+
+```{r echo=TRUE, eval=FALSE, warning=FALSE, message=FALSE, fig.width = 6, fig.height=6}
+# Settings for reading assignments
+grade(wrap_rubric = 45, pdf_height = 4.5)
+```
+
+There are two more dimensions you can adjust, which will become relevant when you begin to add written feedback to your grades (see next section).  The `wrap_notes` input lets you determine the width of text-wrapping for your written feedback (similar to `wrap_rubric` above). The `render_ratio` input lets you adjust the vertical ratio of rubric assessment and written feedback. For example, an assignment may have a brief rubric but you write a lot of feedback; in this scenario you would want a small `render_ratio` of rubric:feedback, e.g., `0.7`. In contrast, if an assignment has a very lengthy rubric and you provide minimal written feedback, `render_ratio` should be larger, e.g., `4` or `5`.  
+
+&nbsp;  
+
+#### Checking for ungraded assignments
+
+To keep track of students you have and have not already graded for an assignment, press on the "See ungraded students" button near the bottom of the left side panel.  
+
+You can also check for ungraded submissions within your `R` script, using the function `view_missing()`:  
+
+```{r echo=TRUE, eval=FALSE, warning=FALSE, message=FALSE, fig.width = 6, fig.height=6}
+view_missing('ENST_338', mode = 'simple') 
+```
+
+This function will return the names of students who do not have grades on file for any assignment that is already due, according to the due date specified when the assignment file was created with the `assignment()` function.  
+
+&nbsp;  
+
+#### Providing written feedback
+
+To provide custom written feedback on an assignment, go to the left sidebar and check the `Provide written feedback?` box below the assignment dropdown. When you do, options will appear below the rubric in the main panel. Here's an example:  
+
+**ADD IMAGE HERE**  
+
+The text boxes allow you write in custom feedback. As you write, the "Preview" box will update with a preview of what the student will see based on what you have written. Note that the text boxes already have some default language provided, to "get the ball rolling" on the beginning and end of your feedback. You can control what that default language is using the inputs `greeting` and `conclusion` in the `grade()` function:
+
+```{r echo=TRUE, eval=FALSE, warning=FALSE, message=FALSE, fig.width = 6, fig.height=6}
 grade(greeting = "Dear STUDENT,\n\Great presentation! Thank you so much for leading the group into this part of the course with such a strong example.\n",
       conclusion = "\nThank you again, STUDENT.\n\nProf. Ezell",
       wrap_rubric = 50,
@@ -306,62 +413,68 @@ grade(greeting = "Dear STUDENT,\n\Great presentation! Thank you so much for lead
       pdf_height = 15)
 ```
 
-&nbsp;  
+Note that the function will replace any instance of `STUDENT` (all-caps required) with the name of the student who is currently selected.  
 
-#### PDF report of grade
+Also note that written feedback will be reset every time you switch students.  
 
-text
+#### Canned comments
 
-```{r echo=TRUE, eval=FALSE, warning=FALSE, message=FALSE, fig.width = 6, fig.height=6}
-#chunk
-```
+Also see that the textbox headers mention "canned comments". This is a reference to a pre-written set of feedback notes that you have the option to feed to the `grade()` function. The idea is that you often end up providing the same feedback items to multiple students, so why not build up a log of what those common feedback items are, then draw from that log in an efficient way?   
 
-&nbsp;  
+To activate this feature, first open a `GoogleSheet` and draft some canned comments. This sheet needs to have two columns: `category` (describing the category of feedback. The function currently recognizes two categories of feedback: `"content"` and `"writing"`) and `comment` (in which you write your feedback content). Here's a screenshot of a minimum example:  
 
-#### Adjusting PDF dimensions 
+**ADD IMAGE HERE**  
 
-text
+Once you have the Sheet setup with a comment or two, change the sharing settings so that *"Anyone with the Link Can View"* and copy the link. Provide that URL link as a character string to the input `canned_comments` in the `grade()` command: 
 
 ```{r echo=TRUE, eval=FALSE, warning=FALSE, message=FALSE, fig.width = 6, fig.height=6}
-#chunk
+grade(canned_comments = 'https://docs.google.com/spreadsheets/d/11SsfrItX4kbwNJ4cmo8wUPiwIy1qhGlpJ-qX5O4iiBM/edit?usp=sharing')
 ```
 
-&nbsp;  
+When you re-launch the grading app and check the written feedback checkbox, you should now see dropbown menus for each category occurring in your `GoogleSheet`.  When you select a canned comment from one of these dropdowns, the preview will show how your feedback is populated. 
 
-#### Providing written feedback
+If you think of a canned comment to add to your `GoogleSheet` in the midst of grading, simply update your `GoogleSheet` then return to the grading app and click the "Refresh Comments" button.  
 
-text
-
-```{r echo=TRUE, eval=FALSE, warning=FALSE, message=FALSE, fig.width = 6, fig.height=6}
-#chunk
-```
-
-&nbsp;  
-
-##### Canned comments 
-
-text
-
-```{r echo=TRUE, eval=FALSE, warning=FALSE, message=FALSE, fig.width = 6, fig.height=6}
-#chunk
-```
-
+Also note that selections of canned comments will be removed each time you switch students.  
 
 &nbsp;  
 
 #### Handling special cases
 
-text
+##### Updating grades 
+
+You may wish to alter a grade you have already saved. Simply select the same course, assignment and student, provide your assessment, then re-save the grade. A warning will appear that a grade already exists, but you can confirm that you wish to overwrite that grade.   
+
+##### Deleting grades
+
+You may wish to delete a grade due to explorating testing or due to a mistake, such as accidentally selecting the wrong assignment or student before saving grade. To delete grades, navigate to your course's folder: `<course_id>/grades/`, find the grade you want to delete, and manually delete the file.  
+
+You should also navigate to the PDF reports of the grades, `<course_id>/reports/grades/`, and delete the PDF of the grade as well.  
+
+##### Late penalties
+
+When a submission is late, you can apply a penalty using the slides in the left sidebar: 
+
+**ADD IMAGE HERE**  
+
+Use the slider to set the percent penalty, then use the dropbown to specify the reason for the penalty. When you save the grade, a note will appear at the bottom of the PDF report of the grade indicating that a penalty was applied.  
+
+You can adjust the dropdown options here using the input `penalty_choices` in the `grade()` command: 
 
 ```{r echo=TRUE, eval=FALSE, warning=FALSE, message=FALSE, fig.width = 6, fig.height=6}
-#chunk
+grade(penalty_choices = c("N/A", 
+                          "Late", 
+                          "No submission received", 
+                          "Behavior", 
+                          "Other"))
 ```
 
-&nbsp;  
+Note that the slider and dropdown may not reset when you switch to a new student.  
+
 
 ##### No submission received
 
-text
+When a student does not submit an assignment and must be given a zero, you can use the method for late penalties, explained above, to apply a 100% penalty and state that the reason was that no submission was received.  
 
 ```{r echo=TRUE, eval=FALSE, warning=FALSE, message=FALSE, fig.width = 6, fig.height=6}
 #chunk
@@ -371,66 +484,29 @@ text
 
 ##### Exemptions from assignment
 
-text
-
-```{r echo=TRUE, eval=FALSE, warning=FALSE, message=FALSE, fig.width = 6, fig.height=6}
-#chunk
-```
-
-&nbsp;  
-
-##### Late submissions & other penalties
-
-text
-
-```{r echo=TRUE, eval=FALSE, warning=FALSE, message=FALSE, fig.width = 6, fig.height=6}
-#chunk
-```
+If a student needs to be exempted from an assignment, such that no score is given and the assignment does not count towards the total points used to calculate their final grade, click on the slider labeled "Exempt this student?" in the left sidebar, then press "Save grade". A grade file will be produced for this student-assignment, in which it will be indicated that the student has an exemption. PDF grade reports are not created for exempt grades.  
 
 &nbsp;  
 
 ##### Extra credit
 
-text
-
-```{r echo=TRUE, eval=FALSE, warning=FALSE, message=FALSE, fig.width = 6, fig.height=6}
-#chunk
-```
-
-
-&nbsp;  
-
-##### Deleting accidental grades
-
-text
-
-```{r echo=TRUE, eval=FALSE, warning=FALSE, message=FALSE, fig.width = 6, fig.height=6}
-#chunk
-```
+If a student earns extra credit on an assignment, you can apply extra credit as a percentage using the slider in the left sidebar labelled "Apply % extra credit". 
 
 &nbsp;  
 
 ### Re-rendering grade PDF's
 
-Re-render grade reports in a batch, if needed:
+At some point you may wish to re-render the PDF's for a set of grades for a particular assignment. Reasons can vary, but perhaps you realize that you want to change the dimensions, word-wrap settings, or rubric:feedback ratio in the PDF. You can do so without touching the original garde files by using the function `render_grades()`:    
 
 ```{r echo=TRUE, eval=FALSE, warning=FALSE, message=FALSE, fig.width = 6, fig.height=6}
-render_grades('ENST_338',
-              'Presentation',
+render_grades(course_id = 'ENST_338',
+              assignment_id = 'Presentation',
               render_ratio =  4,
               pdf_height = 7) 
 ```
 
 &nbsp;  
 
-#### Check for missing submissions
-
-```{r echo=TRUE, eval=FALSE, warning=FALSE, message=FALSE, fig.width = 6, fig.height=6}
-view_missing('ENST_338', mode = 'simple') 
-# are any students without a grade for an assignment that was already due?
-```
-
-&nbsp;  
 
 ### Sending out grades
 
@@ -499,15 +575,13 @@ After the loop is complete, re-run the `view_unshared()` command above to ensure
 
 ### Generate summary reports
 
-text
-
-```{r echo=TRUE, eval=FALSE, warning=FALSE, message=FALSE, fig.width = 6, fig.height=6}
-#chunk
-```
+The `gradebook()` currently has two functions for summarizing the grades you have on file. One generates a report for a single student (`render_student()`), and the other generates a report summarizing current grades for the entire roster (`render_class()`). The former is most useful when you are looking into the performance of a single student (e.g., during a one-on-one meeting), and latter is useful to get a sense of how the entire class is doing and -- at the end of the semester -- to quickly calculate final grades.  
 
 &nbsp;  
 
 #### Student reports
+
+To get a report on how a single student is doing, use the function `render_student()`.  
 
 ```{r echo=TRUE, eval=FALSE, warning=FALSE, message=FALSE, fig.width = 6, fig.height=6}
 render_student('ENST_338',
@@ -516,29 +590,73 @@ render_student('ENST_338',
                gg_height = 8)
 ```
 
-Sending out student reports
+This function will produce a two-pane plot of the student's grade history for your course. Example:  
+
+**ADD IMAGE HERE**  
+
+By default, this report is simply displayed within `R`, but you can save these reports to file by changing the input `to_file` to `TRUE`.  These reports are saved within `<course_id>/reports/students/`.  The date on which you have generated the report is included in the filename.  To modify the height (and crowdedness) of the PDF that is generated, alter the input `gg_height` (the default is 10 inches).  
+
+The `render_student()` function includes an input option named `drop_lowest()`. This is used to drop the lowest grade in a category of assignments, such as a weekly reading quiz, if this is a policy you use in your course. Simply provide the name(s) of `assignment_category`'s for which the lowest grade (or one of the missing grades for a student) should be dropped.  
+
+To render reports for all students at once, you can use the wrapper function `render_students()`.  This is handy for mid-semester check-ins with every student. 
+
+```{r echo=TRUE, eval=FALSE, warning=FALSE, message=FALSE, fig.width = 6, fig.height=6}
+render_student('ENST_338')
+```
+
+Note that for `render_students()`, the `to_file` default is `TRUE` so that each report is saved into your directory. 
+
+To email a report to each student individually, you can use the function `email_student_reports()`.  
 
 ```{r echo=TRUE, eval=FALSE, warning=FALSE, message=FALSE, fig.width = 6, fig.height=6}
 email_student_reports(course_id = 'ENST_338',
-                      json_path = '/Users/ekezell/repos/credentials/desktop_gradebook.json')
+                      json_path = '/Users/fake/fake/fake/credentials.json')
 ```
 
 &nbsp;  
 
 #### Class reports
 
-text
+To get a report of the entire class altogether -- for example to compute mid-term or final grades -- use the function `render_class`()`.  
 
 ```{r echo=TRUE, eval=FALSE, warning=FALSE, message=FALSE, fig.width = 6, fig.height=6}
-final_grades <-
-  render_class('ENST_338',
-               letter_key = 'default')
-
-final_grades$plot
-final_grades$grades %>%
-  select(student, last_name, letter, current_grade) %>%
-  arrange(last_name)
+render_class('ENST_338')
 ```
+
+This function returns a list with 2 slots: `$plot`, which is a plot of all students' current grade in the course, and `$grades`, which is a `data.frame()` of those final grades. 
+
+*Example of the plot:*  
+
+**ADD IMAGE HERE**  
+
+*Example of the table:*  
+
+**ADD IMAGE HERE**  
+
+This function accounts for all exempt grades on file, and the final grades are based on assignments that are already past their due date. If a student already has a grade for a submission not yet due (perhaps they turned it in early and you've already graded it), then that grade will also be included in that student's final grade calculation (but in other students').  
+
+Note that `render_class` has several optional inputs:  
+
+```{r echo=TRUE, eval=FALSE, warning=FALSE, message=FALSE, fig.width = 6, fig.height=6}
+render_class(course_id, 
+             drop_lowest = NULL, 
+             apply_curve = 0, 
+             letter_key = NULL)
+```
+
+- The input option `drop_lowest()` is used to drop the lowest grade in a category of assignments, such as a weekly reading quiz, if this is a policy you use in your course. Simply provide the name(s) of `assignment_category`'s for which the lowest grade (or one of the missing grades for a student) should be dropped.  
+
+- The input option `apply_curve` lets you apply a blanket percentage adjustment to all students equally.  
+
+- The input option `letter_key` lets you provide a "key" that tells `gradebook` how to translate a percentage grade into a letter grade.  If you don't provide one yourself, the package's default key will be used:  
+
+```{r echo=TRUE, eval=TRUE, warning=FALSE, message=FALSE, fig.width = 6, fig.height=6}
+data(letter_grade_key)
+
+letter_grade_key
+```
+
+If you provide a custom key yourself, it must be in the same format as the built-in dataset above.  
 
 &nbsp;  
 
@@ -548,7 +666,7 @@ Once you get to this point of `gradebook` setup, in which your course is setup w
 
 (1) Make sure `gradebook` is loaded and your working directory is set to your grading folder.  
 
-(2) Run `grade()` to grade new submissions, checking the PDFs being saved into `<course_id>/reports/grades` to review formatting, and adjusting PDF formatting settings within the grading app as needed.  
+(2) Run `grade()` to grade new submissions, checking the PDFs being saved into `<course_id>/reports/grades` to review formatting, and adjusting PDF formatting settings within the grading app as needed.  I tend to end up having a different `grade()` command for each `assignment_id`, or at least every `assignment_category`, since I usually want to customize PDf sizes and feedback greetings/conclusions and URL's for canned comments. 
 
 (3) Check `view_unshared()` to see which grades need to be emailed out.  
 
@@ -558,408 +676,8 @@ Once you get to this point of `gradebook` setup, in which your course is setup w
 
 (6) When students meet with me or write to inquire about their grade, I check their grade history with `render_student()`. Two weeks before mid-term and again before the end of term, email out grade reports so that students know where they stand and can check my work for issues or mistakes.  
 
-This workflow is supported by two `R` files for each course: 
+This workflow is all documented within the `grade_<course_id>.R` script I maintain for the course, so that it is easy for me to re-run certain lines of code whenever I need to.  
 
 &nbsp;  
-
-#### **`grade.R`** 
-
-This is the R file I keep open and use regularly for grading
-
-```{r echo=TRUE, eval=FALSE, warning=FALSE, message=FALSE, fig.width = 6, fig.height=6}
-###############################################################################
-# grade.R
-###############################################################################
-
-# Update gradebook
-remotes::install_github("ericmkeen/gradebook")
-library(gradebook)
-
-# Ensure working directory is set to grading folder
-setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
-
-# Set course ID
-course_id <- 'ENST_338'
-#setup_course(course_id)
-
-# Students
-students_url <- 'https://docs.google.com/spreadsheets/d/1ISxHeEM-noYGNAAG-BEt0zQek94EAX4SZMuwgFXXqew/edit?usp=sharing'
-update_roster('ENST_338', students_url) # rerun this each time your googlesheet is changed
-
-# Quick view of students
-view_students('ENST_338') %>% as.data.frame
-view_students('ENST_338') %>% pull(goes_by)
-
-# Get email-ready list of students
-paste(view_students('ENST_338')$email, collapse=', ')
-
-
-################################################################################
-################################################################################
-# Grade & manage
-
-# Grade
-grade()
-
-# Reading assignments
-grade(wrap_rubric = 40, pdf_height = 5)
-
-# Print submitted reading assignments to Console for review
-form_url <- 'https://docs.google.com/spreadsheets/d/1Zff8Ds--Yu4xPiVSLe4YV-3IZxwkpdX56LJjBXHQA1A/edit?usp=sharing'
-review_google_form(view_students('ENST_421'),
-                   form_url)
-
-# First case study / deep dive  ================================================
-
-grade(greeting = "Dear STUDENT,\n\Great presentation! Thank you so much for leading the group into this part of the course with such a strong example.\n",
-      conclusion = "\nThank you again, STUDENT.\n\nProf. Ezell",
-      wrap_rubric = 50,
-      wrap_notes = 100,
-      render_ratio = 5,
-      pdf_height = 15)
-
-
-# QA/QC ========================================================================
-
-view_assignments('ENST_338') # View simple list of assignments
-view_status('ENST_338') # get a master list of all assignments on file and the grades that are already complete.
-view_missing('ENST_338', mode = 'simple') #%>% tail # are any students without a grade for an assignment that was already due?
-render_grades('ENST_338') # Re-render grade reports in a batch, if needed (helpful it modifying the ggplot code)
-
-render_grades('ENST_338',
-              'Presentation',
-              render_ratio =  4,
-              pdf_height = 7) # Re-render grade reports in a batch, if needed (helpful it modifying the ggplot code)
-
-view_missing('ENST_338', mode = 'simple') %>% filter(goes_by == 'Adam')
-
-# Share grades =================================================================
-
-view_unshared('ENST_338') # Return which grades have not yet been shared
-
-# email_test(recipient = 'ekezell@sewanee.edu',
-#            json_path = '/Users/ekezell/repos/credentials/desktop_gradebook.json')
-
-email_grades(course_id = 'ENST_338',
-             unshared_only = TRUE,
-             your_email = 'ekezell@sewanee.edu',
-             json_path = '/Users/ekezell/repos/credentials/desktop_gradebook.json')
-
-# Custom body - super basic
-email_grades(course_id = 'ENST_338',
-             unshared_only = TRUE,
-             your_email = 'ekezell@sewanee.edu',
-             email_body =
-               "Attached you will find your grade on this assignment.\n\nBest wishes,\nProf. Ezell",
-             json_path = '/Users/ekezell/repos/credentials/desktop_gradebook.json')
-
-# Custom body -- final essay
-email_grades(course_id = 'ENST_338',
-             unshared_only = TRUE,
-             your_email = 'ekezell@sewanee.edu',
-             email_body =
-               "Huzzah! The last and final email from me for ENST 101! At long last!\n\nAttached you will find your grade on the final essay. As I state in my feedback at the bottom of the rubric, I am so grateful for your work this semester. I look forward to staying in touch!\n\nBest wishes,\nProf. Ezell",
-             json_path = '/Users/ekezell/repos/credentials/desktop_gradebook.json')
-
-# Reports ======================================================================
-
-# Report for a single student
-render_student('ENST_338',
-               'Cassie',
-               to_file = FALSE,
-               gg_height = 8)
-
-# Reports for all students
-render_students('ENST_101',
-                gg_height = 8,
-                to_file = TRUE)
-
-# Email reports
-email_student_reports(course_id = 'ENST_338',
-                      json_path = '/Users/ekezell/repos/credentials/desktop_gradebook.json')
-
-# Final grades
-final_grades <-
-  render_class('ENST_338',
-               letter_key = 'default')
-
-final_grades$plot
-final_grades$grades %>%
-  select(student, last_name, letter, current_grade) %>%
-  arrange(last_name)
-
-################################################################################
-################################################################################
-```
-
-&nbsp;  
-
-#### **`setup.R`** 
-
-This is the `R` file within the course folder, which you use to encode instructions for each assignment.  
-
-```{r echo=TRUE, eval=FALSE, warning=FALSE, message=FALSE, fig.width = 6, fig.height=6}
-###############################################################################
-# setup.R
-###############################################################################
-
-# Set course ID
-course_id <- 'ENST_338'
-
-data(grade_scale1) ; grade_scale1
-data(grade_scale2) ; grade_scale2
-data(grade_scale3) ; grade_scale3
-
-grade_scale4 <- grade_scale3
-grade_scale4$percent <- c(60, 75, 90)
-grade_scale4
-
-# Weekly work - Abstracts ======================================================
-
-ass_cat <- 'Weekly work'
-out_of <- 4
-
-(ww_rubric <- list('<b>Truly a distillation:</b> not an outline or preview of what the reading contains, but a proper summary.' = grade_scale1,
-                   'Details make clear that the <b>entire reading was read carefully.</b>' = grade_scale1,
-                   '<b>All important aspects</b> of the reading are covered properly within the word-limit constraints' = grade_scale4,
-                   '<b>Writing</b> is compelling, effective, efficient.' = grade_scale4,
-                   "Within the <b>word limit.</b>"=grade_scale4,
-                   '<b>Adherence to instructions overall.</b>' = grade_scale4))
-
-assignment(course_id = course_id,                     assignment_id = 'Week 03 Abstract',
-           assignment_category = ass_cat, out_of = out_of, due_date = '2024-02-01',
-           share = TRUE, rubric = ww_rubric)
-
-assignment(course_id = course_id,                     assignment_id = 'Week 04 Abstract',
-           assignment_category = ass_cat, out_of = out_of, due_date = '2024-02-08',
-           share = TRUE, rubric = ww_rubric)
-
-assignment(course_id = course_id,                     assignment_id = 'Week 05 Abstract',
-           assignment_category = ass_cat, out_of = out_of, due_date = '2024-02-15',
-           share = TRUE, rubric = ww_rubric)
-
-assignment(course_id = course_id,                     assignment_id = 'Week 06 Abstract',
-           assignment_category = ass_cat, out_of = out_of, due_date = '2024-02-22',
-           share = TRUE, rubric = ww_rubric)
-
-assignment(course_id = course_id,                     assignment_id = 'Week 10 Abstract',
-           assignment_category = ass_cat, out_of = out_of, due_date = '2024-03-21',
-           share = TRUE, rubric = ww_rubric)
-
-assignment(course_id = course_id,                     assignment_id = 'Week 11 Abstract',
-           assignment_category = ass_cat, out_of = out_of, due_date = '2024-03-28',
-           share = TRUE, rubric = ww_rubric)
-
-assignment(course_id = course_id,                     assignment_id = 'Week 12 Abstract',
-           assignment_category = ass_cat, out_of = out_of, due_date = '2024-04-04',
-           share = TRUE, rubric = ww_rubric)
-
-assignment(course_id = course_id,                     assignment_id = 'Week 13 Abstract',
-           assignment_category = ass_cat, out_of = out_of, due_date = '2024-04-11',
-           share = TRUE, rubric = ww_rubric)
-
-assignment(course_id = course_id,                     assignment_id = 'Week 14 Abstract',
-           assignment_category = ass_cat, out_of = out_of, due_date = '2024-04-18',
-           share = TRUE, rubric = ww_rubric)
-
-# Weekly work - Discussion Q&A ======================================================
-
-ass_cat <- 'Weekly work'
-out_of <- 4
-rq_rubric <- NULL
-
-(ww_rubric <- list('<b>Discussion question</b> is thoughtful, thought-provoking, original, and creative.' = grade_scale4,
-                   '<b>Response to discussion question</b> is thoughtful, thought-provoking, original, and creative.' = grade_scale1,
-                   'Details make clear that the <b>entire reading was read carefully.</b>' = grade_scale1,
-                   '<b>Many different important aspects</b> of the reading are touched on throughout the answer.' = grade_scale1,
-                   '<b>Writing</b> is compelling, effective, efficient.' = grade_scale4,
-                   "Within the <b>word limit.</b>"=grade_scale4,
-                   '<b>Adherence to instructions overall.</b>' = grade_scale4))
-
-assignment(course_id = course_id,                     assignment_id = 'Week 03 Discussion Q&A',
-           assignment_category = ass_cat, out_of = out_of, due_date = '2024-02-01',
-           share = TRUE, rubric = ww_rubric)
-
-assignment(course_id = course_id,                     assignment_id = 'Week 04 Discussion Q&A',
-           assignment_category = ass_cat, out_of = out_of, due_date = '2024-02-08',
-           share = TRUE, rubric = ww_rubric)
-
-assignment(course_id = course_id,                     assignment_id = 'Week 05 Discussion Q&A',
-           assignment_category = ass_cat, out_of = out_of, due_date = '2024-02-15',
-           share = TRUE, rubric = ww_rubric)
-
-assignment(course_id = course_id,                     assignment_id = 'Week 06 Discussion Q&A',
-           assignment_category = ass_cat, out_of = out_of, due_date = '2024-02-22',
-           share = TRUE, rubric = ww_rubric)
-
-assignment(course_id = course_id,                     assignment_id = 'Week 10 Discussion Q&A',
-           assignment_category = ass_cat, out_of = out_of, due_date = '2024-03-21',
-           share = TRUE, rubric = ww_rubric)
-
-assignment(course_id = course_id,                     assignment_id = 'Week 11 Discussion Q&A',
-           assignment_category = ass_cat, out_of = out_of, due_date = '2024-03-28',
-           share = TRUE, rubric = ww_rubric)
-
-assignment(course_id = course_id,                     assignment_id = 'Week 12 Discussion Q&A',
-           assignment_category = ass_cat, out_of = out_of, due_date = '2024-04-04',
-           share = TRUE, rubric = ww_rubric)
-
-assignment(course_id = course_id,                     assignment_id = 'Week 13 Discussion Q&A',
-           assignment_category = ass_cat, out_of = out_of, due_date = '2024-04-11',
-           share = TRUE, rubric = ww_rubric)
-
-assignment(course_id = course_id,                     assignment_id = 'Week 14 Discussion Q&A',
-           assignment_category = ass_cat, out_of = out_of, due_date = '2024-04-18',
-           share = TRUE, rubric = ww_rubric)
-
-
-# Presentations ================================================================
-
-asscat <- 'Presentations'
-
-rubric <- list('Substance' = 'category',
-               '<b>A strategic and well-crafted distillation/synthesis</b> of the material.' = grade_scale1,
-               'Details make it clear that <b>all materials were studied closely and incorporated closely.</b>' = grade_scale4,
-               '<b>All important aspects</b> of the reading are covered properly within the word-limit constraints' = grade_scale4,
-               '<b>Story & narrative:</b> the talk takes the form of a story, taking the audience on a shared journey. Anecdotes, characters, plot twists, and heart are used throughout' = grade_scale1,
-               '<b>Organization overall</b> is intuitive & clear for the audience.' = grade_scale1,
-               '<b>First moments:</b> Excellent, engaging, memorable & relevant attention getter, setting the tone for the entire talk.' = grade_scale1,
-               '<b>Compelling justification:</b> The audience is made to care about the issue & context first, <b>before any mention</b> of research or science' = grade_scale1,
-               '<b>Final moments:</b> clear & memorable summary of points; refers back to thesis/proposed project. Ends with strong take-away/punchline.' = grade_scale1,
-               'Delivery' = 'category',
-               '<b>Preparation:</b> clearly well-prepared, evident in the timing of the talk, familiarity with visual aids and what will be said; no reading off slides.' = grade_scale4,
-               '<b>Time allocation:</b> delivered within the allocated time window; time within the talk is allocated strategically. ' = grade_scale4,
-               'All group members <b>share speaking load equally</b>.' = grade_scale4,
-               '<b>Speech:</b> conversational, sincere, dynamic & compelling; good pace of speech; no trailing off or rambling; no vocal fillers; impactful use of pauses.' = grade_scale1,
-               '<b>Language:</b> can articulate meaning clearly through eloquent word choice & premeditated sentences; no unexplained jargon, abbreviations or acronyms.' = grade_scale1,
-               '<b>Explanation:</b> Any word/concept that may not be understood is explained, either explicitly or within abundant context, at a level appropriate to audience.' = grade_scale4,
-               '<b>Non-verbal delivery:</b> The “Second Conversation”: Attire, composure, & body language reflect sincerity & professionalism, without sacrificing authenticity.' = grade_scale1,
-               '<b>Mistakes:</b> mistakes are handled in a graceful & self-forgiving manner; recovery is quick.' = grade_scale1,
-               '<b>Energetic, relatable, genuine, poised, confident but vulnerable, at ease</b>' = grade_scale1,
-               'Visual aids' = 'category',
-               '<b>Strategic use:</b> redundancy (if any) between what is spoken and what is displayed is strategic, not used as a crutch for presenting.' = grade_scale4,
-               '<b>Design & display:</b> of professional quality, not sloppy or thrown together. Aids prioritize simplicity, clarity, and good design.' = grade_scale4,
-               '<b>Text is sparse</b>; no more than 6 bullet points of large text, each spanning one line or less.' = grade_scale4,
-               'Any <b>data visualization</b> has been reduced to the simplest possible form, or explained accordingly.' = grade_scale4)
-
-out_of <- 12
-
-assignment(course_id = course_id, assignment_category = asscat,
-           assignment_id = 'Group case study 1',
-           out_of = out_of,
-           due_date = '2024-03-05',
-           share = TRUE, rubric = rubric)
-
-assignment(course_id = course_id, assignment_category = asscat,
-           assignment_id = 'Group case study 2',
-           out_of = out_of,
-           due_date = '2024-04-30',
-           share = TRUE, rubric = rubric)
-
-assignment(course_id = course_id, assignment_category = asscat,
-           assignment_id = 'Group deep dive 1',
-           out_of = out_of,
-           due_date = '2024-03-05',
-           share = TRUE, rubric = rubric)
-
-assignment(course_id = course_id, assignment_category = asscat,
-           assignment_id = 'Group deep dive 2',
-           out_of = out_of,
-           due_date = '2024-04-30',
-           share = TRUE, rubric = rubric)
-
-assignment(course_id = course_id, assignment_category = asscat,
-           assignment_id = 'Solo talk 1',
-           out_of = out_of,
-           due_date = '2024-03-05',
-           share = TRUE, rubric = rubric)
-
-assignment(course_id = course_id, assignment_category = asscat,
-           assignment_id = 'Solo talk 2 ',
-           out_of = out_of,
-           due_date = '2024-04-30',
-           share = TRUE, rubric = rubric)
-
-# Group interviews =============================================================
-
-(rubric <- list('<b>Making meaning, earnest effort, challenging yourself</b>' = grade_scale3,
-                '<b>Ask or engage with speaker at least once</b>' = grade_scale3,
-                "<b>Respectful of other listeners, not crowding out anyone else's voice</b>" = grade_scale3,
-                '<b>Engaged & attentive listener.</b>' = grade_scale3))
-
-out_of <- 3
-
-assignment(course_id = course_id, assignment_category = 'Expert interviews',
-           assignment_id = 'Chris Picard',
-           out_of = out_of,
-           due_date = '2024-02-08',
-           share = TRUE, rubric = rubric)
-
-assignment(course_id = course_id, assignment_category = 'Expert interviews',
-           assignment_id = 'Jonathan Meiburg',
-           out_of = out_of,
-           due_date = '2024-02-22',
-           share = TRUE, rubric = rubric)
-
-assignment(course_id = course_id, assignment_category = 'Expert interviews',
-           assignment_id = 'Anne Simonis',
-           out_of = out_of,
-           due_date = '2024-03-21',
-           share = TRUE, rubric = rubric)
-
-assignment(course_id = course_id, assignment_category = 'Expert interviews',
-           assignment_id = 'Joe YSR',
-           out_of = out_of,
-           due_date = '2024-04-16',
-           share = TRUE, rubric = rubric)
-
-assignment(course_id = course_id, assignment_category = 'Expert interviews',
-           assignment_id = 'Barb Taylor',
-           out_of = out_of,
-           due_date = '2024-04-18',
-           share = TRUE, rubric = rubric)
-
-assignment(course_id = course_id, assignment_category = 'Expert interviews',
-           assignment_id = 'Coral Theology',
-           out_of = out_of,
-           due_date = '2024-04-23',
-           share = TRUE, rubric = rubric)
-
-
-# Final essay ==================================================================
-
-(final_rubric <- list('<b>Making meaning, earnest effort, challenging yourself</b>' = grade_scale1,
-                      '<b>Profound, informed, nuanced, and courageous engagement</b> with the semester of material.' = grade_scale1,
-                     '<b>Clear, coherent, & compelling organization,</b> guided by a single central idea/thesis and framework.' = grade_scale1,
-                     '<b>All supporting content is presented well & clearly.</b> Reason is balanced with stories of the human heart.' = grade_scale1,
-                     '<b>At least 10 case studies and 10 deep-dive papers</b> are discussed and referenced as part of the supporting material for your framework.' = grade_scale1,
-                     '<b>Concepts are explained well & clearly,</b> with attention to word-choice and order of ideas.' = grade_scale4,
-                     '<b>Writing is concise, exact, & clear.</b> Conceptual flow is intuitive & straightforward.' = grade_scale1,
-                     '<b>Paragraphs are short</b> (no more than 11 lines), focused on a single subjet, with a clear purpose statement.' = grade_scale4,
-                     '<b>Writing is polished and error-free.</b>' = grade_scale4,
-                     '<b>Adherence to instructions.</b>' = grade_scale4))
-
-assignment(course_id = course_id,
-           assignment_category = 'Final essay',
-           assignment_id = 'Final essay',
-           out_of = 18,
-           due_date = '2024-05-05',
-           share = TRUE,
-           extra_credit = FALSE,
-           rubric = final_rubric)
-
-
-################################################################################
-################################################################################
-# Syllabus prep
-################################################################################
-################################################################################
-
-plot_assignment_calendar(course_id)
-
-plot_assignment_weights(course_id)
-```
-
-
 
 

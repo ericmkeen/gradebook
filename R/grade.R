@@ -93,7 +93,7 @@ grade <- function(greeting = 'Dear STUDENT,\n\nWell-done here. I particularly ap
         sliderInput('penalty', 'Apply % penalty?', min=0, max=100, value=0, step=5, width='100%'),
         selectInput('penalty_why', 'Cause of penalty?', choices=penalty_choices, selected=1, width='100%'),
         br(),
-        actionButton('get_missing', label='See missing submissions', width='100%'),
+        actionButton('get_missing', label='See ungraded students', width='100%'),
         br(),
         br(),
         sliderInput('pdf_height', label = h6('Set height of PDF (inches)'), value = pdf_height, min = 4, max = 30, step = .5, width = '100%'),
@@ -344,13 +344,13 @@ grade <- function(greeting = 'Dear STUDENT,\n\nWell-done here. I particularly ap
     output$feedback_text <- shiny::renderUI({
       if(!is.null(rv$student) & !is.null(rv$assignment)){
         #input$student
-        fluidRow(textAreaInput('feedback_pre', 'Custom feedback (before canned comments):',
+        fluidRow(textAreaInput('feedback_pre', 'Custom feedback (before canned comments, if any):',
                                value=greeting,
                                height = '150px',
                                width='100%',
                                resize='vertical'),
                  br(),
-                 textAreaInput('feedback_post', 'Custom feedback (after canned comments):',
+                 textAreaInput('feedback_post', 'Custom feedback (after canned comments, if any):',
                                value= conclusion,
                                height = '100px',
                                width='100%',

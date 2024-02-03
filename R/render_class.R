@@ -4,6 +4,7 @@
 #' @param drop_lowest Optional; if there are `assignment_category`'s for which you want to drop the lowest grade for each student,
 #' provide those categories here as a character vector.
 #' @param apply_curve Optional; adjust the entire class's grades by a percentage point that you can specify here.
+#' @param anonymize A Boolean that lets you replace the students' names with a randomized set of numbers, for confidentiality purposes.
 #' @param letter_key  Optional; include a key for translating a percentage to a letter grade.
 #' For required format, see `data(letter_grade_key)`; you can also type `"default"`, and the function
 #' will load `data(letter_grade_key)` for you and use it.
@@ -17,6 +18,7 @@
 render_class <- function(course_id,
                          drop_lowest = NULL,
                          apply_curve = 0,
+                         anonymize = FALSE,
                          letter_key = NULL){
 
   if(FALSE){ #=======================
@@ -27,10 +29,10 @@ render_class <- function(course_id,
     apply_curve = 10
     drop_lowest = NULL
     letter_key = NULL
+    anonymize = FALSE
     drop_lowest <- c('Reading quiz')
     render_class('ENST_209')
-    render_class('ENST_209', c('Reading quiz'))
-    render_class('ENST_209', c('Film response'))
+    render_class('ENST_209', anonymize = TRUE)
     render_class('ESCI_220')
     render_class('ESCI_220', apply_curve = 10)
 
@@ -99,6 +101,12 @@ render_class <- function(course_id,
 
     grades$letter <- letters
     grades
+  }
+
+  # Anonymize?
+  if(anonymize){
+    (new_ids <- sample(1000:9999, size=nrow(grades), replace = FALSE))
+    grades$student <- paste0('student ', new_ids)
   }
 
   p <-

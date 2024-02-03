@@ -4,7 +4,13 @@
 \alias{render_class}
 \title{Render grades for entire class}
 \usage{
-render_class(course_id, drop_lowest = NULL, apply_curve = 0, letter_key = NULL)
+render_class(
+  course_id,
+  drop_lowest = NULL,
+  apply_curve = 0,
+  anonymize = FALSE,
+  letter_key = NULL
+)
 }
 \arguments{
 \item{course_id}{Course ID}
@@ -13,6 +19,8 @@ render_class(course_id, drop_lowest = NULL, apply_curve = 0, letter_key = NULL)
 provide those categories here as a character vector.}
 
 \item{apply_curve}{Optional; adjust the entire class's grades by a percentage point that you can specify here.}
+
+\item{anonymize}{A Boolean that lets you replace the students' names with a randomized set of numbers, for confidentiality purposes.}
 
 \item{letter_key}{Optional; include a key for translating a percentage to a letter grade.
 For required format, see \code{data(letter_grade_key)}; you can also type \code{"default"}, and the function

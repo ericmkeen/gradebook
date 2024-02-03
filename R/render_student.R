@@ -4,6 +4,7 @@
 #' @param goes_by Student name (goes_by column)
 #' @param drop_lowest Optional; if there are `assignment_category`'s for which you want to drop the lowest grade for each student,
 #' provide those categories here as a character vector.
+#' @param anonymize A Boolean that lets you replace the student's name with a randomized set of numbers, for confidentiality purposes.
 #' @param gg_height Height of the `ggplot2` output, in inches.
 #' @param to_file Boolean; if `TRUE`, the report will be saved to the class's folder structure (course > reports > students)
 #'
@@ -16,6 +17,7 @@
 render_student <- function(course_id,
                            goes_by,
                            drop_lowest = NULL,
+                           anonymize = FALSE,
                            gg_height = 10,
                            to_file = FALSE){
 
@@ -25,6 +27,7 @@ render_student <- function(course_id,
     to_file <- FALSE
     gg_height = 12
     drop_lowest = NULL
+    anonymize = TRUE
     drop_lowest = 'Reading quiz'
 
     render_student(course_id, goes_by, drop_lowest)
@@ -36,6 +39,8 @@ render_student <- function(course_id,
                    drop_lowest = 'Film response'
                    )
     df$render
+
+    render_student('ENST_209', 'Betsy', anonymize = TRUE)
   }  #===============================
 
   # Get class data
@@ -112,6 +117,9 @@ render_student <- function(course_id,
 
 
   # Plot 3: Running percentage
+  (studplot <- ifelse(anonymize == TRUE,
+                      paste0('student ',sample(1000:9999, size=1, replace = FALSE)),
+                      stud))
   c <-
     ggplot(mrs) +
     geom_point(mapping = aes(x=due_date, y=total_percent), color='firebrick') +
@@ -121,7 +129,7 @@ render_student <- function(course_id,
     scale_y_continuous(breaks = seq(0, 100, by=10), limits=c(0,100)) +
     geom_hline(yintercept = 100, lty=2) +
     ylab('Overall grade') +
-    labs(title=paste0(stud, ' in ', gsub('_', ' ', course_id),
+    labs(title=paste0(studplot, ' in ', gsub('_', ' ', course_id),
                       ': current grade = ',
                       mrs$total_percent[nrow(mrs)],
                       '%'))

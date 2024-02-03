@@ -56,7 +56,7 @@ setup_course <- function(course_id){
   }
 
   # Setup R file for staging assignments
-  setup_file <- paste0(course_id, '/setup.R')
+  setup_file <- paste0(course_id, '/setup_', course_id, '.R')
   if(!file.exists(setup_file)){
     file.create(setup_file)
   }

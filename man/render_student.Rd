@@ -8,6 +8,7 @@ render_student(
   course_id,
   goes_by,
   drop_lowest = NULL,
+  anonymize = FALSE,
   gg_height = 10,
   to_file = FALSE
 )
@@ -19,6 +20,8 @@ render_student(
 
 \item{drop_lowest}{Optional; if there are \code{assignment_category}'s for which you want to drop the lowest grade for each student,
 provide those categories here as a character vector.}
+
+\item{anonymize}{A Boolean that lets you replace the student's name with a randomized set of numbers, for confidentiality purposes.}
 
 \item{gg_height}{Height of the \code{ggplot2} output, in inches.}
 
