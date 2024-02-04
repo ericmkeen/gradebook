@@ -408,6 +408,12 @@ grade <- function(greeting = 'Dear STUDENT,\n\nWell-done here. I particularly ap
 
     output$feedback_preview <- shiny::renderText({ rv$feedback_preview })
 
+    # Erase written feedback if checkbox becomes unchecked
+    observeEvent(input$offer_feedback, {
+      if(input$offer_feedback == FALSE){
+        rv$feedback_preview <- ''
+      }
+    })
 
     #===========================================================================
     # save
