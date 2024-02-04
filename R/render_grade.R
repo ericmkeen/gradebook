@@ -92,8 +92,6 @@ render_grade <- function(grade_file,
     scale_y_continuous(labels=(grade$rubric_grades$standard_rmd),
                        breaks = grade$rubric_grades$rank,
                        limits = c(0.8, (max(grade$rubric_grades$rank) + ymax_padding))) +
-    #scale_y_continuous(labels=(rev(grade$rubric_grades$standard_rmd)),
-    #                   breaks = grade$rubric_grades$rank) +
     ylab(NULL) +
     xlab('Percentage') +
     theme(axis.text.y= ggtext::element_markdown(),
@@ -125,11 +123,11 @@ render_grade <- function(grade_file,
   }
   if(!is.null(grade$extra_credit)){
     if(grade$extra_credit > 0){
-      capti <- paste0(capti, '<br>', '**Note:** extra credit (',grade$extra_credit,' pts) applied.')
+      capti <- paste0(capti, '<br>', '**Note:** extra credit (',grade$extra_credit,'%) applied.')
     }
   }
   if(grade$penalty > 0){
-    capti <- paste0(capti, '<br>', '**NOTE:** this assignment received a **penalty** of ', grade$penalty,'.<br>',
+    capti <- paste0(capti, '<br>', '**NOTE:** this assignment received a **penalty** of ', round(100*grade$penalty, 2), '%.<br>',
                     '*Cause of penalty* = ', grade$penalty_cause)
   }
 

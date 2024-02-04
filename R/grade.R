@@ -93,7 +93,6 @@ grade <- function(greeting = 'Dear STUDENT,\n\nWell-done here. I particularly ap
         sliderInput('penalty', 'Apply % penalty?', min=0, max=100, value=0, step=5, width='100%'),
         selectInput('penalty_why', 'Cause of penalty?', choices=penalty_choices, selected=1, width='100%'),
         br(),
-        actionButton('get_missing', label='See ungraded students', width='100%'),
         br(),
         br(),
         sliderInput('pdf_height', label = h6('Set height of PDF (inches)'), value = pdf_height, min = 4, max = 30, step = .5, width = '100%'),
@@ -520,6 +519,12 @@ grade <- function(greeting = 'Dear STUDENT,\n\nWell-done here. I particularly ap
           grade$points <- round(((grade$percent / 100) * grade$assignment$out_of), 5)
         }
         print(grade)
+
+        # Handle 100% penalties when no rubric info is filled out
+        if(is.na(grade$percent) & is.na(grade$points) & grade$penalty == 1){
+          grade$percent <- 0
+          grade$points <- 0
+        }
 
         message('Exemption status: ', grade$exemption)
 
