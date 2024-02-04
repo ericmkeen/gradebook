@@ -43,7 +43,7 @@ grade <- function(greeting = 'Dear STUDENT,\n\nWell-done here. I particularly ap
     canned_comments = 'https://docs.google.com/spreadsheets/d/1vClmqxbC5xhGig7hQyaRjx2rkc2vIUvNUkXXN2v4GOU/edit?usp=sharing'
     render = TRUE
 
-    grade()
+    #grade()
   }
   ##############################################################################
   ##############################################################################
@@ -51,7 +51,7 @@ grade <- function(greeting = 'Dear STUDENT,\n\nWell-done here. I particularly ap
   # Get set of courses
   (courses <- list.dirs('.', recursive=FALSE))
   (courses <- gsub('./', '', courses))
-  (courses <- courses[! courses %in% c('.git', '.Rproj.user', 'man', 'R', 'data','z','other')])
+  (courses <- courses[! courses %in% c('.git', '.Rproj.user', 'man', 'R', 'data','z','other', 'img')])
 
   # Canned comments
   comms_content <- comms_writing <- comms_other <- c()
@@ -419,7 +419,7 @@ grade <- function(greeting = 'Dear STUDENT,\n\nWell-done here. I particularly ap
         # Check to see if grade is already on file for this students + assignment
         #course_id <- 'ENST_338'
         #ass <- list(assignment_id <- 'Group case study 1')
-        graded <- view_grades_quick(course_id = course_id, assignment_id = ass$assignment_id)
+        graded <- view_grades_quick(course_id = input$course, assignment_id = ass$assignment_id)
         print(graded)
         (grade_exists <- ifelse(stud$goes_by %in% graded$goes_by, TRUE, FALSE))
         print(grade_exists)

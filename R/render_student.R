@@ -40,7 +40,7 @@ render_student <- function(course_id,
                    )
     df$render
 
-    render_student('ENST_209', 'Betsy', anonymize = TRUE)
+    render_student('ENST_209', 'Alex', anonymize = TRUE)
   }  #===============================
 
   # Get class data

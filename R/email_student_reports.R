@@ -15,9 +15,10 @@
 #'
 email_student_reports <- function(course_id,
                                   student_id = NULL,
+                                  your_email,
+                                  sign_off = 'Best wishes,\nYour professor.',
                                   report_date = lubridate::ymd(lubridate::date(Sys.time())),
-                                  your_email = 'ekezell@sewanee.edu',
-                                  email_body = 'Attached you will find a report indicating your overall grade in the course to date, with a summary of each assignment grade I have on file for you. Please review this and reply to me if you believe any of my records are erroneous. Note that any overdue assignment (ones currently with a zero) can be updated if you submit the make-up materials.\n\nPlease let me know if you have any questions or concerns.\n\nBest wishes!\n\nProf. Ezell',
+                                  email_body = 'Attached you will find a report indicating your overall grade in the course to date. Please review this and reply to me with any questions or concerns.',
                                   json_path = FALSE,
                                   verbose=TRUE){
 

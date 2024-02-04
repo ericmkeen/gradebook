@@ -19,7 +19,7 @@ render_class <- function(course_id,
                          drop_lowest = NULL,
                          apply_curve = 0,
                          anonymize = FALSE,
-                         letter_key = NULL){
+                         letter_key = 'default'){
 
   if(FALSE){ #=======================
     setwd("/Users/ekezell/Library/CloudStorage/GoogleDrive-ekezell@sewanee.edu/My Drive/grades/2023 fall")
@@ -32,7 +32,7 @@ render_class <- function(course_id,
     anonymize = FALSE
     drop_lowest <- c('Reading quiz')
     render_class('ENST_209')
-    render_class('ENST_209', anonymize = TRUE)
+    render_class('ENST_209', anonymize = TRUE, letter_key = 'default')
     render_class('ESCI_220')
     render_class('ESCI_220', apply_curve = 10)
 
@@ -107,6 +107,7 @@ render_class <- function(course_id,
   if(anonymize){
     (new_ids <- sample(1000:9999, size=nrow(grades), replace = FALSE))
     grades$student <- paste0('student ', new_ids)
+    grades$last_name <- NULL
   }
 
   p <-
