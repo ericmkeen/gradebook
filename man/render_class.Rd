@@ -9,7 +9,7 @@ render_class(
   drop_lowest = NULL,
   apply_curve = 0,
   anonymize = FALSE,
-  letter_key = NULL
+  letter_key = "default"
 )
 }
 \arguments{

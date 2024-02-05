@@ -4,13 +4,27 @@
 #' @param assignment_id Optionally specify an assignment; otherwise unsent grades from all assignments will be sent.
 #' @param student_id Optionally specify a student; otherwise unsent grades for all students will be sent.
 #' @param your_email Your email address.
+#' @param intro The introductory text used to address the student. Any instance of all-upper-case `"STUDENT"`
+#' will be replaced with the student's `goes_by` name.
+#' @param signoff How you wish to sign-off the email. The default is a generic "Best wishes, Your Professor."
 #' @param email_body The main body of the email message; this will appear one line below the greeting to the student.
 #' @param exempt_body The body to use in the event that a student is exempt fro mthe given assignment.
+#' @param mode This function can operate in one of three modes:
+#' (1) **`"test"`** (the default) will simulate sending emails without doing so, instead
+#' printing the messages and attachments to the console for your review.
+#' (Note that in `test` mode, you do not need to provide a `json` file, and the
+#' grade's "shared" status will not change.).
+#' (2) **`"draft"`** will prepare draft messages instead of sent emails, allowing you to go into
+#' `Gmail` and review or modify the draft messages before sending.
+#' (Note that in `draft` mode, each grade will be marked as "shared"!)
+#' (3) **`"send"`** will actually send the emails.
+#' As you start out in `gradebook`, we recommend beginning with `test`,
+#' then graduating to `draft` and going to `Gmail` to actually commit to sending the drafted emails.
 #' @param unshared_only Only share grades that have not yet been emailed? Default is `TRUE`.
 #' @param json_path File path to your `json` credentials on your machine. This is necessary to send emails via the package `gmailr`.
 #' @param verbose Print updates to console?
 #'
-#' @return desc
+#' @return Depends on `mode` input (see above).
 #' @export
 #'
 email_grades  <- function(course_id,
@@ -18,34 +32,41 @@ email_grades  <- function(course_id,
                           student_id = NULL,
                           your_email = 'ekezell@sewanee.edu',
                           intro = 'Dear STUDENT,',
-                          signoff = 'Best wishes,\nProf. Ezell',
-                          email_body = 'Attached you will find your grade on this assignment.\n\nIf applicable, please recall that any overdue assignment (ones currently with a zero) can be updated if you submit the make-up materials.\n\nPlease let me know if you have any questions or concerns.',
+                          signoff = 'Best wishes,\nYour professor',
+                          email_body = 'Attached you will find your grade on this assignment.\n\nPlease let me know if you have any questions or concerns.',
                           exempt_body = 'This email is a confirmation that you were exempt from this assignment. Please let me know if you have any questions.',
+                          mode = 'test',
                           unshared_only = TRUE,
-                          json_path = FALSE,
+                          json_path = NULL,
                           verbose=TRUE){
 
   if(FALSE){ #=============================
+    mode <- 'send'
+    mode <- 'draft'
+    mode <- 'test'
     course_id <- 'ENST_338'
-    course_id <- 'ESCI_220'
     assignment_id <- NULL
     student_id <- NULL
     unshared_only <- TRUE
     verbose=TRUE
     your_email = 'ekezell@sewanee.edu'
     json_path = '/Users/ekezell/repos/credentials/desktop_gradebook.json'
-    email_body = 'Attached you will find your grade on this assignment.\n\nPlease let me know if you have any questions or concerns.\n\nBest wishes,\nProf. Ezell'
-    exempt_body = 'This email is a confirmation that you were exempt from this assignment. Please let me know if you have any questions.\n\nProf. Ezell'
+    intro = 'Dear STUDENT,'
+    signoff = 'Best wishes,\nYour professor'
+    email_body = 'Attached you will find your grade on this assignment.\n\nPlease let me know if you have any questions or concerns.'
+    exempt_body = 'This email is a confirmation that you were exempt from this assignment. Please let me know if you have any questions.'
     #email_grades(json_path = json_path)
 
   } #======================================
 
+  # Get unshared grades
+  (unshared <- view_unshared(course_id = course_id, mode = 'complete', verbose=FALSE))
+  if(is.null(unshared)){unshared <- data.frame()}
+  unshared
+
   if(unshared_only){
-    # Get unshared grades
-    (unshared <- view_unshared(course_id = course_id, mode = 'complete', verbose=FALSE))
     if(verbose){base::message('Total unshared grades = ',nrow(unshared))}
   }else{
-    unshared <- view_status(course_id)
     if(verbose){base::message('Total grades (incl. those that may already have been shared) = ', nrow(unshared))}
   }
 
@@ -75,13 +96,21 @@ email_grades  <- function(course_id,
     if(nrow(unshared)==0){
       if(verbose){base::message('No grades in need of sharing. Stopping here.')}
     }else{
-      if(verbose){base::message('The following grades will be shared:\n')}
+      if(verbose){
+        if(mode == 'send'){base::message('The following grades will be sent to students:\n')}
+        if(mode == 'draft'){base::message('The following grades will be staged in draft emails to students (not actually sent):\n')}
+        if(mode == 'test'){base::message('The following grades will be FAKE sent (TEST VERSION ONLY -- no emails will be sent):\n')}
+      }
       print(unshared)
       proceed <- readline(prompt="Type y to proceed: ")
+      message('')
       #print(proceed)
       if(proceed=='y'){
-        # Authorize gmailr
-        gmailr::gm_auth_configure(path = json_path)
+
+        if(mode %in% c('draft', 'send')){
+          # Authorize gmailr
+          gmailr::gm_auth_configure(path = json_path)
+        }
 
         # Loop through grades & send
         i=1
@@ -99,60 +128,100 @@ email_grades  <- function(course_id,
             (coursi <- grade$assignment$course_id)
             (cati <- grade$assignment$assignment_category)
             (assi <- grade$assignment$assignment_id)
-            (intro <- gsub('STUDENT', studi, intro))
+            (opener <- gsub('STUDENT', studi, intro))
 
             if(exempt_check){
               (subject <- paste0(gsub('_',' ',coursi),' | Exemption for ', cati,': ',assi))
-              (body <- paste0(intro,'\n\n',exempt_body,'\n\n',signoff))
+              (body <- paste0(opener,'\n\n',exempt_body,'\n\n',signoff))
             }else{
               (subject <- paste0(gsub('_',' ',coursi),' | Feedback on ', cati,': ',assi))
-              (body <- paste0(intro,'\n\n',email_body,'\n\n',signoff))
+              (body <- paste0(opener,'\n\n',email_body,'\n\n',signoff))
             }
 
-            # troubleshooting
-            if(FALSE){
-              base::message('student is ',studi)
-              base::message('email is ',emaili)
-              base::message('course is ',coursi)
-              base::message('subject is ',subject)
-              base::message('assignment is ',assi)
-              base::message('email body is ',body)
-            }
+            # TEST SEND ========================================================
+            # no actual sending, just print content to Console
+            if(mode == 'test'){
+              base::message('\nStudent name (based on grade file): ',studi)
+              base::message('Student email (based on grade file): ',emaili)
 
-            # Prep and send email
-            if(exempt_check){
-              gmailr::gm_mime() %>%
-                gmailr::gm_to(emaili) %>%
-                gmailr::gm_from(your_email) %>%
-                gmailr::gm_text_body(body) %>%
-                gmailr::gm_subject(subject) %>%
-                gmailr::gm_send_message()
-            }else{
-              gmailr::gm_mime() %>%
-                gmailr::gm_to(emaili) %>%
-                gmailr::gm_from(your_email) %>%
-                gmailr::gm_text_body(body) %>%
-                gmailr::gm_subject(subject) %>%
-                gmailr::gm_attach_file(file=report_fn) %>%
-                gmailr::gm_send_message()
-            }
+              base::message('\n=================================================================')
+              base::message('SUBJECT:  ',subject)
+              base::message('\n',body)
+              base::message('=================================================================')
 
-            Sys.sleep(1)
+              if(exempt_check){
+                base::message('\nNO ATTACHMENT (Student is exempt from assignment)')
+              }else{
+                base::message('\nATTACHMENT FILE:  ',report_fn)
+              }
+              base::message('\n')
+              # Wait for user
+              if(i < nrow(unshared)){ readline(prompt="Press [enter] to continue") }
+              base::message('\n')
+            } # end of mode = test
 
-            if(verbose){base::message('  --- --- email sent to ', emaili, '\n')}
+            # JUST DRAFT  ======================================================
+            if(mode == 'draft'){
+              if(exempt_check){
+                gmailr::gm_mime() %>%
+                  gmailr::gm_to(emaili) %>%
+                  gmailr::gm_from(your_email) %>%
+                  gmailr::gm_text_body(body) %>%
+                  gmailr::gm_subject(subject) %>%
+                  gmailr::gm_create_draft()
+              }else{
+                gmailr::gm_mime() %>%
+                  gmailr::gm_to(emaili) %>%
+                  gmailr::gm_from(your_email) %>%
+                  gmailr::gm_text_body(body) %>%
+                  gmailr::gm_subject(subject) %>%
+                  gmailr::gm_attach_file(file=report_fn) %>%
+                  gmailr::gm_create_draft()
+              }
+              Sys.sleep(2)
+              if(verbose){base::message('  --- --- email draft staged for ', emaili, '\n')}
+              # Change status to shared & resave
+              grade$shared <- TRUE
+              saveRDS(grade, file=gradi)
+            } # end of mode == 'draft'
 
-            # Change status to shared
-            grade$shared <- TRUE
-            # Re-save object
-            saveRDS(grade, file=gradi)
+            # ACTUALLY SEND  ===================================================
+            if(mode == 'send'){
+              # Prep and send email
+              if(exempt_check){
+                gmailr::gm_mime() %>%
+                  gmailr::gm_to(emaili) %>%
+                  gmailr::gm_from(your_email) %>%
+                  gmailr::gm_text_body(body) %>%
+                  gmailr::gm_subject(subject) %>%
+                  gmailr::gm_send_message()
+              }else{
+                gmailr::gm_mime() %>%
+                  gmailr::gm_to(emaili) %>%
+                  gmailr::gm_from(your_email) %>%
+                  gmailr::gm_text_body(body) %>%
+                  gmailr::gm_subject(subject) %>%
+                  gmailr::gm_attach_file(file=report_fn) %>%
+                  gmailr::gm_send_message()
+              }
+
+              Sys.sleep(2)
+              if(verbose){base::message('  --- --- email sent to ', emaili, '\n')}
+              # Change status to shared & resave
+              grade$shared <- TRUE
+              saveRDS(grade, file=gradi)
+            } # end of mode == 'send'
+
           }else{
-            #if(verbose){base::message('  --- --- this assignment was')}
+            # this assignment is not supposed to be sshared
           }
-        }
+        } # loop through each grade to share
 
-        # deauthorize token
-        gmailr::gm_deauth()
-      }
-    }
-  }
+        if(mode %in% c('draft','send')){
+          # deauthorize token
+          gmailr::gm_deauth()
+        }
+      } # end of proceed y if
+    } # end of if there are any unshared grades to share (after filtering by assignment/student)
+  } # end of if there are any unshared grades to share
 }

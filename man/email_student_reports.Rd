@@ -6,11 +6,14 @@
 \usage{
 email_student_reports(
   course_id,
+  your_email,
   student_id = NULL,
   report_date = lubridate::ymd(lubridate::date(Sys.time())),
-  your_email = "ekezell@sewanee.edu",
+  intro = "Dear STUDENT,",
+  signoff = "Best wishes,\\nYour professor",
   email_body =
-    "Attached you will find a report indicating your overall grade in the course to date, with a summary of each assignment grade I have on file for you. Please review this and reply to me if you believe any of my records are erroneous. Note that any overdue assignment (ones currently with a zero) can be updated if you submit the make-up materials.\\n\\nPlease let me know if you have any questions or concerns.\\n\\nBest wishes!\\n\\nProf. Ezell",
+    "Attached you will find a report indicating your overall grade in the course to date. Please review this and reply to me with any questions or concerns.",
+  mode = "test",
   json_path = FALSE,
   verbose = TRUE
 )
@@ -18,13 +21,30 @@ email_student_reports(
 \arguments{
 \item{course_id}{Course ID.}
 
+\item{your_email}{Your email address.}
+
 \item{student_id}{Optionally specify a student; otherwise unsent grades for all students will be sent.}
 
 \item{report_date}{The date of the report to share, provided as a character string (format yyyy-mm-dd). Default is the current date according to your system's time.}
 
-\item{your_email}{Your email address.}
+\item{intro}{The introductory text used to address the student. Any instance of all-upper-case \code{"STUDENT"}
+will be replaced with the student's \code{goes_by} name.}
+
+\item{signoff}{How you wish to sign-off the email. The default is a generic "Best wishes, Your Professor."}
 
 \item{email_body}{The main body of the email message; this will appear one line below the greeting to the student.}
+
+\item{mode}{This function can operate in one of three modes:
+(1) \strong{\code{"test"}} (the default) will simulate sending emails without doing so, instead
+printing the messages and attachments to the console for your review.
+(Note that in \code{test} mode, you do not need to provide a \code{json} file, and the
+grade's "shared" status will not change.).
+(2) \strong{\code{"draft"}} will prepare draft messages instead of sent emails, allowing you to go into
+\code{Gmail} and review or modify the draft messages before sending.
+(Note that in \code{draft} mode, each grade will be marked as "shared"!)
+(3) \strong{\code{"send"}} will actually send the emails.
+As you start out in \code{gradebook}, we recommend beginning with \code{test},
+then graduating to \code{draft} and going to \code{Gmail} to actually commit to sending the drafted emails.}
 
 \item{json_path}{File path to your \code{json} credentials on your machine. This is necessary to send emails via the package \code{gmailr}.}
 

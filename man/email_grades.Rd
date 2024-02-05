@@ -10,13 +10,14 @@ email_grades(
   student_id = NULL,
   your_email = "ekezell@sewanee.edu",
   intro = "Dear STUDENT,",
-  signoff = "Best wishes,\\nProf. Ezell",
+  signoff = "Best wishes,\\nYour professor",
   email_body =
-    "Attached you will find your grade on this assignment.\\n\\nIf applicable, please recall that any overdue assignment (ones currently with a zero) can be updated if you submit the make-up materials.\\n\\nPlease let me know if you have any questions or concerns.",
+    "Attached you will find your grade on this assignment.\\n\\nPlease let me know if you have any questions or concerns.",
   exempt_body =
     "This email is a confirmation that you were exempt from this assignment. Please let me know if you have any questions.",
+  mode = "test",
   unshared_only = TRUE,
-  json_path = FALSE,
+  json_path = NULL,
   verbose = TRUE
 )
 }
@@ -29,9 +30,26 @@ email_grades(
 
 \item{your_email}{Your email address.}
 
+\item{intro}{The introductory text used to address the student. Any instance of all-upper-case \code{"STUDENT"}
+will be replaced with the student's \code{goes_by} name.}
+
+\item{signoff}{How you wish to sign-off the email. The default is a generic "Best wishes, Your Professor."}
+
 \item{email_body}{The main body of the email message; this will appear one line below the greeting to the student.}
 
 \item{exempt_body}{The body to use in the event that a student is exempt fro mthe given assignment.}
+
+\item{mode}{This function can operate in one of three modes:
+(1) \strong{\code{"test"}} (the default) will simulate sending emails without doing so, instead
+printing the messages and attachments to the console for your review.
+(Note that in \code{test} mode, you do not need to provide a \code{json} file, and the
+grade's "shared" status will not change.).
+(2) \strong{\code{"draft"}} will prepare draft messages instead of sent emails, allowing you to go into
+\code{Gmail} and review or modify the draft messages before sending.
+(Note that in \code{draft} mode, each grade will be marked as "shared"!)
+(3) \strong{\code{"send"}} will actually send the emails.
+As you start out in \code{gradebook}, we recommend beginning with \code{test},
+then graduating to \code{draft} and going to \code{Gmail} to actually commit to sending the drafted emails.}
 
 \item{unshared_only}{Only share grades that have not yet been emailed? Default is \code{TRUE}.}
 
@@ -40,7 +58,7 @@ email_grades(
 \item{verbose}{Print updates to console?}
 }
 \value{
-desc
+Depends on \code{mode} input (see above).
 }
 \description{
 Send grades to students over email

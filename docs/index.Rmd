@@ -602,10 +602,22 @@ email_grades(course_id = 'ENST_338',
              signoff = 'Best wishes,\nProf. Ezell',
              email_body =  "Attached you will find your grade on this assignment.",
              exempt_body = "This email is a confirmation that you were exempt from this assignment.",
+             mode = 'test',
              json_path = '/Users/fake/fake/fake/credentials.json')
 ```
 
-When you run this command, the function will...   
+This function can operate in one of three modes:  
+
+(1) **`"test"`** (the default) will simulate sending emails without doing so, instead printing the messages and attachments to the console for your review. (Note that in `test` mode, you do not need to provide a `json` file, and the grade's "shared" status will not change -- this is a handy way to exlore the function's features without committing anything you can't rescind!).  
+
+(2) **`"draft"`** will prepare draft messages instead of sent emails, allowing you to go into `Gmail` and review or modify the draft messages before sending. (Note that in `draft` mode, each grade will be marked as "shared"!)   
+
+(3) **`"send"`** will actually send the emails.   
+
+As you start out in `gradebook`, we recommend beginning with `test`, then graduating to `draft` and going to `Gmail` to actually commit to sending the drafted emails. Once you are very confident in how the function works, you can consider going into `send` mode.   
+
+
+When you run this command in either `draft` or `send` mode, the function will...   
 
 (1) first ask for confirmation that you want to continue, after showing you a list of the grades that would be shared.    
 
@@ -657,12 +669,27 @@ Note that for `render_students()`, the `to_file` default is `TRUE` so that each 
 To email a report to each student individually, you can use the function `email_student_reports()`.  
 
 ```{r echo=TRUE, eval=FALSE, warning=FALSE, message=FALSE, fig.width = 6, fig.height=6}
-email_student_reports(course_id = 'ENST_338',
-                      your_email,
-                      sign_off = 'Best wishes,\nYour professor.',
-                      email_body = 'Attached you will find a report indicating your overall grade in the course to date. Please review this and reply to me with any questions or concerns.',
-                      json_path = '/Users/fake/fake/fake/credentials.json')
+email_student_reports(
+  course_id,
+  your_email,
+  student_id = NULL,
+  report_date = lubridate::ymd(lubridate::date(Sys.time())),
+  intro = "Dear STUDENT,",
+  signoff = "Best wishes,\nYour professor",
+  email_body = "Attached you will find a report indicating your overall grade in the course to date. Please review this and reply to me with any questions or concerns.",
+  mode = "test",
+  json_path = '/Users/fake/fake/fake/credentials.json')
 ```
+
+Like the `email_grades()` function above, this function can operate in one of three modes:  
+
+(1) **`"test"`** (the default) will simulate sending emails without doing so, instead printing the messages and attachments to the console for your review. (Note that in `test` mode, you do not need to provide a `json` file).  
+
+(2) **`"draft"`** will prepare draft messages instead of sent emails, allowing you to go into `Gmail` and review or modify the draft messages before sending. 
+
+(3) **`"send"`** will actually send the emails.   
+
+As you start out in `gradebook`, we recommend beginning with `test`, then graduating to `draft` and going to `Gmail` to actually commit to sending the drafted emails. Once you are very confident in how the function works, you can consider going into `send` mode.   
 
 &nbsp;  
 

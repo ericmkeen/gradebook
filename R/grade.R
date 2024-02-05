@@ -21,7 +21,7 @@
 #' @import shinyjs
 
 grade <- function(greeting = 'Dear STUDENT,\n\nWell-done here. I particularly appreciate \n\nMoving forward, I suggest focusing primarily upon \n',
-                  conclusion = '\n\nThank you again, STUDENT, for your hard work,\nProf. Ezell',
+                  conclusion = '\n\nThank you again, STUDENT, for your hard work.',
                   canned_comments = NULL,
                   penalty_choices=c('N/A', 'Late', 'No submission received', 'Behavior', 'Other'),
                   scroll_height = 200,
