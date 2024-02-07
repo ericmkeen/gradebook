@@ -11,6 +11,8 @@
 #' If the `which` column contains the value `"Abstract"`, the function will look for a reading summary in a column named `abstract`.
 #' If the `which` column contains the value `"Discussion Q&A"`, the function will look for a discussion question in a column named `question`,
 #' and it will look for a response in a column named `abstract`.
+#' The column `graded` is used to indicate which entries you have already graded. You manually maintain this column within the `GoogleSheet`.
+#' Each graded entry should have a `1` in this column. Ungraded entries should be blank.
 #' @param week_of_class_start Indicate which week of the year the class started in,
 #' in order for the function to assign each timestamp submission to a week of the cours.
 #'
@@ -21,7 +23,7 @@
 #'
 review_google_form <- function(roster,
                                form_url,
-                               form_cols = c('datetime', 'email', 'topic', 'which', 'question', 'abstract'),
+                               form_cols = c('datetime', 'email', 'topic', 'which', 'question', 'abstract', 'graded'),
                                week_of_class_start = 2){
 
   # ============================================================================
@@ -36,6 +38,12 @@ review_google_form <- function(roster,
 
   submissions <- submissions %>% select(1:length(form_cols))
   names(submissions) <- form_cols
+  names(submissions)
+
+  # Filter to ungraded
+  submissions <- submissions %>% filter(graded != 1)
+
+  # Join student info
   suppressMessages({
     submissions <- left_join(submissions, roster %>% select(email, goes_by))
   })

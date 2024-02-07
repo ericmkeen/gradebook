@@ -27,37 +27,43 @@ review_timesheet <- function(roster,
   names(hourlog) <- form_cols
 
   # ============================================================================
-  message('Calculating cumulative and average weekly work totals...')
+  message('Calculating running totals for each student...')
 
   suppressMessages({
     hourlog <-
-    hourlog %>%
-    mutate(hours = as.numeric(hours),
-           percent = as.numeric(percent),
-           adjusted = hours*(percent/100)) %>%
-    mutate(date = lubridate::mdy(date),
-           week_of_year = lubridate::week(date),
-           week_of_class = week_of_year - week_of_class_start) %>%
-    left_join(roster, by='email')
+      hourlog %>%
+      mutate(hours = as.numeric(hours),
+             percent = as.numeric(percent),
+             adjusted = hours*(percent/100)) %>%
+      mutate(date = lubridate::mdy(date),
+             yday = lubridate::yday(date),
+             week_of_year = lubridate::week(date),
+             week_of_class = week_of_year - week_of_class_start) %>%
+      mutate(week_frac = yday/7) %>%
+      left_join(roster, by='email') %>%
+      group_by(goes_by) %>%
+      arrange(date) %>%
+      mutate(running_total = cumsum(adjusted)) %>%
+      ungroup()
   })
 
   hourlog %>% head
 
-  weeklog <-
-    hourlog %>%
-    group_by(goes_by) %>%
-    arrange(date) %>%
-    mutate(running_total = cumsum(adjusted)) %>%
-    ungroup() %>%
-    group_by(goes_by, week_of_class) %>%
-    summarize(week_total = round(sum(adjusted), 2),
-              week_running_total = round(sum(running_total), 2)) %>%
-    mutate(weeks_to_date = week_of_class - 1) %>%
-    mutate(weekly_avg = week_running_total / weeks_to_date) %>%
-    arrange(goes_by, week_of_class)
+  # weeklog <-
+  #   hourlog %>%
+  #   group_by(goes_by) %>%
+  #   arrange(date) %>%
+  #   mutate(running_total = cumsum(adjusted)) %>%
+  #   ungroup() %>%
+  #   group_by(goes_by, week_of_class) %>%
+  #   summarize(week_total = round(sum(adjusted), 2),
+  #             week_running_total = round(sum(running_total), 2)) %>%
+  #   mutate(weeks_to_date = week_of_class - 1) %>%
+  #   mutate(weekly_avg = week_running_total / weeks_to_date) %>%
+  #   arrange(goes_by, week_of_class)
 
-  weeklog %>% head
+  # weeklog %>% head
 
-  return(weeklog)
+  return(hourlog)
 
 }
