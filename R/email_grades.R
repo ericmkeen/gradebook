@@ -44,9 +44,11 @@ email_grades  <- function(course_id,
     mode <- 'send'
     mode <- 'draft'
     mode <- 'test'
-    course_id <- 'ENST_338'
+    course_id <- 'ENST_421'
+    assignment_id <- 'Week 04 journal'
     assignment_id <- NULL
     student_id <- NULL
+    unshared_only <- FALSE
     unshared_only <- TRUE
     verbose=TRUE
     your_email = 'ekezell@sewanee.edu'
@@ -60,13 +62,16 @@ email_grades  <- function(course_id,
   } #======================================
 
   # Get unshared grades
-  (unshared <- view_unshared(course_id = course_id, mode = 'complete', verbose=FALSE))
-  if(is.null(unshared)){unshared <- data.frame()}
-  unshared
+  #(unshared <- view_unshared(course_id = course_id, mode = 'complete', verbose=FALSE))
+  #if(is.null(unshared)){unshared <- data.frame()}
+  #unshared
 
+  unshared <- data.frame()
   if(unshared_only){
+    (unshared <- view_unshared(course_id = course_id, mode = 'complete', verbose=FALSE))
     if(verbose){base::message('Total unshared grades = ',nrow(unshared))}
   }else{
+    (unshared <- view_status(course_id = course_id) %>% filter(graded == TRUE))
     if(verbose){base::message('Total grades (incl. those that may already have been shared) = ', nrow(unshared))}
   }
 
