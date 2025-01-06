@@ -23,13 +23,13 @@
 #'
 review_google_form <- function(roster,
                                form_url,
-                               form_cols = c('datetime', 'email', 'topic', 'which', 'question', 'abstract', 'graded'),
+                               form_cols = c('datetime', 'email', 'topic', 'which', 'question', 'abstract', 'pledged','graded'),
                                week_of_class_start = 2){
 
   # ============================================================================
   message('\nDownloading in data from Google Form...')
 
-  roster <- view_students(course_id)
+  #roster <- view_students(course_id)
   (submissions <- gsheet::gsheet2tbl(form_url))
   submissions %>% names
 
@@ -39,14 +39,22 @@ review_google_form <- function(roster,
   submissions <- submissions %>% select(1:length(form_cols))
   names(submissions) <- form_cols
   names(submissions)
+  submissions[,4:8] %>% head
+  submissions$graded %>% table(useNA='ifany')
 
   # Filter to ungraded
-  submissions <- submissions %>% filter(graded != 1)
+  submissions <- submissions %>%
+    mutate(graded = tidyr::replace_na(graded, 0)) %>%
+    filter(graded != 1)
+  submissions %>% nrow
 
   # Join student info
+  roster %>% names
+  roster
   suppressMessages({
-    submissions <- left_join(submissions, roster %>% select(email, goes_by))
+    submissions <- left_join(submissions, roster %>% select(email, goes_by), by='email')
   })
+  submissions %>% head
   submissions %>% names
   submissions <-
     submissions %>%

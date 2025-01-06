@@ -27,6 +27,7 @@ render_grade <- function(grade_file,
                          pdf_height = NULL){
 
   if(FALSE){ #========================
+    grade_file <- 'ENST_254/grades/ENST_254 --- Colead instructor --- 1st half --- Emma.RData'
     grade_file <- "ENST_101/grades/ENST_101 --- News brief --- News brief 1 --- Ivy.RData"
     grade_file <- "ESCI_220/grades/ESCI_220 --- R workshop --- #1 Carbon emissions --- ekezell.RData"
     grade_file <- "ESCI_220/grades/ESCI_220 --- R workshop --- #1 Carbon emissions --- ericmkeen.RData"
@@ -36,15 +37,46 @@ render_grade <- function(grade_file,
     grade_file <- 'ESCI_220/grades/ESCI_220 --- Mini-Watson --- Mini-Watson full proposal --- Zach.RData'
     grade_file <- 'ENST_209/grades/ENST_209 --- Film response --- Film response 1 --- Claire.RData'
     grade_file <- "ESCI_220/grades/ESCI_220 --- Research Grant Proposal --- Pre-proposal submission --- Grace S..RData"
-    wrap_rubric = 30
+    wrap_rubric = 50
     wrap_notes = 100
+    ymax_padding = 0.2
     render_ratio = 2
+    show_percentage = FALSE
+    letter_key = 'default'
     pdf_height = NULL
     render_grade(grade_file)
   } #=================================
 
   # Read in grade
   grade <- readRDS(grade_file)
+
+  # Get some settings from the assignment
+  (show_percentage <- ifelse('show_percentage' %in% names(grade$assignment),
+                            grade$assignment$show_percentage, TRUE))
+  (letter_key <- ifelse('letter_key' %in% names(grade$assignment),
+                            grade$assignment$letter_key, NA))
+
+  # Determine letter grade to show
+  grade$percent
+  letter_grade <- NA
+  if(!show_percentage){
+    # Include letter grade key?
+    if(!is.na(letter_key)){
+      if(letter_key == 'default'){
+        data(letter_grade_key)
+      }else{
+        letter_grade_key <- letter_key
+      }
+
+      letter_grade <- sapply(grade$percent, function(x){
+        (letti <- which(letter_grade_key$grade_floor <= round(x)))
+        letter_grade_key[letti,]
+        x_letter <- letter_grade_key$letter_detail[letti[1]]
+        return(x_letter)
+      })
+    }
+  }
+  letter_grade
 
   # Convert formatting from HTML to RMD ========================================
   standard_rmd <- grade$rubric_grades$standard
@@ -97,7 +129,7 @@ render_grade <- function(grade_file,
     theme(axis.text.y= ggtext::element_markdown(),
           plot.caption = ggtext::element_markdown())
 
-  if(!is.na(grade$percent)){
+  if(!is.na(grade$percent) & show_percentage){
     p <- p +
       geom_vline(xintercept = grade$percent, lty=2, color='firebrick', lwd=.8, alpha=.6)
   }
@@ -113,8 +145,12 @@ render_grade <- function(grade_file,
                   grade$assignment$due_date)
 
   # Prepare caption
+  if(show_percentage){
   (capti <- paste0('**Percentage**', ' = ', round(grade$percent,1), '<br>',
                    '**Points toward final grade**', ' = ', round(grade$points,1),' out of ', grade$assignment$out_of))
+  }else{
+    (capti <- paste0('**Letter grade**', ' = ', letter_grade, '<br>'))
+  }
   if(grade$exemption == TRUE){
     capti <- paste0(capti, '<br>', '**NOTE:** STUDENT **EXEMPTED** FROM THIS ASSIGNMENT UNTIL FURTHER NOTICE.')
   }

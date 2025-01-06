@@ -25,6 +25,7 @@ review_timesheet <- function(roster,
 
   hourlog <- gsheet::gsheet2tbl(form_url) %>% select(2:5)
   names(hourlog) <- form_cols
+  hourlog$date
 
   # ============================================================================
   message('Calculating running totals for each student...')
@@ -42,9 +43,10 @@ review_timesheet <- function(roster,
       mutate(week_frac = yday/7) %>%
       left_join(roster, by='email') %>%
       group_by(goes_by) %>%
-      arrange(date) %>%
+      arrange(yday) %>%
       mutate(running_total = cumsum(adjusted)) %>%
-      ungroup()
+      ungroup() %>%
+      arrange(goes_by, yday)
   })
 
   hourlog %>% head

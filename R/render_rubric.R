@@ -134,7 +134,9 @@ render_rubric <- function(course_id,
 
     # Save it
     (lines <- (rubric %>% length)*.7)
-    ggsave(filename=rub_file, width=7, height=max(c(5, lines)))
+    ggsave(filename=rub_file,
+           plot = p,
+           width=7, height=max(c(5, lines)))
 
   }
 

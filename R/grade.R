@@ -41,8 +41,15 @@ grade <- function(greeting = 'Dear STUDENT,\n\nWell-done here. I particularly ap
     greeting = 'Dear STUDENT,\n\nWell-done here. I particularly appreciate \n\nMoving forward, I suggest focusing primarily upon \n'
     conclusion = '\n\nThank you again, STUDENT, for your hard work,\nProf. Ezell'
     canned_comments = 'https://docs.google.com/spreadsheets/d/1vClmqxbC5xhGig7hQyaRjx2rkc2vIUvNUkXXN2v4GOU/edit?usp=sharing'
+    canned_comments = NULL
     render = TRUE
-
+    scroll_height = 200
+    render = TRUE
+    wrap_rubric = 30
+    wrap_notes = 100
+    render_ratio = 2.25
+    ymax_padding = .2
+    pdf_height = 10
     #grade()
   }
   ##############################################################################
@@ -96,7 +103,7 @@ grade <- function(greeting = 'Dear STUDENT,\n\nWell-done here. I particularly ap
         br(),
         br(),
         sliderInput('pdf_height', label = h6('Set height of PDF (inches)'), value = pdf_height, min = 4, max = 30, step = .5, width = '100%'),
-        sliderInput('render_ratio', label = h6('Height ratio of rubric to notes'), value = render_ratio, min = .25, max = 6, step = .1, width = '100%'),
+        sliderInput('render_ratio', label = h6('Height ratio of rubric to notes'), value = render_ratio, min = .25, max = 10, step = .1, width = '100%'),
         sliderInput('wrap_rubric', label = h6('Line width of rubric items (in PDF)'), value = wrap_rubric, min = 20, max = 200, step = 1, width = '100%'),
         sliderInput('wrap_notes', label = h6('Line width of notes'), value = wrap_notes, min = 20, max = 200, step = 1, width = '100%'),
         width=4
@@ -183,6 +190,7 @@ grade <- function(greeting = 'Dear STUDENT,\n\nWell-done here. I particularly ap
       if(!is.null(input$course) & input$course != '' &
          !is.null(input$assignment) & input$assignment != ''){
         (ass <- paste0(input$course, '/assignments/', input$assignment, '.rds'))
+        print(ass)
         assi <- readRDS(ass)
         rv$assignment <- assi
         # Update grade status dataframe
