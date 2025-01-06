@@ -19,7 +19,13 @@ setup_course <- function(course_id){
     dir.create(course_id)
   }
 
-  # Within it, make subfolders
+  # make sure www folder exists
+  sub_ass <- paste0('www')
+  if(!dir.exists(sub_ass)){
+    dir.create(sub_ass)
+  }
+
+  # Within course folder, make subfolders
   sub_ass <- paste0(course_id, '/assignments')
   if(!dir.exists(sub_ass)){
     dir.create(sub_ass)

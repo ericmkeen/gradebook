@@ -13,6 +13,8 @@ assignment(
   extra_credit = FALSE,
   share = TRUE,
   rubric = NULL,
+  show_percentage = TRUE,
+  letter_key = "default",
   portal = NULL,
   overwrite = TRUE
 )
@@ -33,6 +35,12 @@ assignment(
 \item{share}{If \code{TRUE}, the grade for this assignment should be emailed to the students. It can be handy to set this to \code{FALSE} for regular completion grades, such as reading quizzes.}
 
 \item{rubric}{Provide an optional rubric here, in the form of a list in which each slot is named with a character string indicating what is being assessed (e.g., 'Quality of writing') and the content of each slot is a grade scale (see built-in dataset \code{grade_scale1} as an example). If left as \code{NULL}, the default rubric will be used (see the built-in dataset \code{default_rubric}).}
+
+\item{show_percentage}{Boolean; share the precise grade percentage, or just the letter grade?}
+
+\item{letter_key}{Optional, and only used if \code{show_percentage} is \code{FALSE}; include a key for translating a percentage to a letter grade.
+For required format, see \code{data(letter_grade_key)}; you can also type \code{"default"}, and the function
+will load \code{data(letter_grade_key)} for you and use it.}
 
 \item{portal}{Option to include a URL (as a character string) to the portal where submissions can be found. For convenience only.}
 

@@ -139,7 +139,9 @@ assignment(course_id = 'ENST_338',
            out_of = 5, 
            due_date = '2024-02-01',
            extra_credit = FALSE,
-           share = TRUE, 
+           share = TRUE,
+           show_percentage = TRUE,
+           letter_key = 'default',
            rubric = NULL)
 ```
 

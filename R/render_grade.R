@@ -27,6 +27,8 @@ render_grade <- function(grade_file,
                          pdf_height = NULL){
 
   if(FALSE){ #========================
+    grade_file <- 'www/ENST_222 --- Roll Call --- Chapter 1 Loomings --- Kate.RData'
+    grade_file <- 'ENST_421/grades/ENST_421 --- Journal --- Week 03 journal --- Brock.RData'
     grade_file <- 'ENST_254/grades/ENST_254 --- Colead instructor --- 1st half --- Emma.RData'
     grade_file <- "ENST_101/grades/ENST_101 --- News brief --- News brief 1 --- Ivy.RData"
     grade_file <- "ESCI_220/grades/ESCI_220 --- R workshop --- #1 Carbon emissions --- ekezell.RData"
@@ -49,6 +51,8 @@ render_grade <- function(grade_file,
 
   # Read in grade
   grade <- readRDS(grade_file)
+  grade %>% names
+  grade$assignment %>% names
 
   # Get some settings from the assignment
   (show_percentage <- ifelse('show_percentage' %in% names(grade$assignment),
@@ -216,22 +220,18 @@ render_grade <- function(grade_file,
   lines
   (total_height <- n_standards + lines)
 
-  (plot_file <- paste0(
-    grade$course,'/reports/grades/',
-    paste(grade$course,
-          grade$assignment$assignment_category,
-          grade$assignment$assignment_id,
-          grade$student$goes_by,
-          sep=' --- '),
-    '.pdf'))
+  (plot_file <- ifelse(grepl('www/', grade_file),
+                       'www/most_recent.pdf',
+                       paste0(grade$course,'/reports/grades/',
+                              paste(grade$course,
+                                    grade$assignment$assignment_category,
+                                    grade$assignment$assignment_id,
+                                    grade$student$goes_by,
+                                    sep=' --- '),
+                              '.pdf')))
 
   if(lines > 0){
 
-    #if(lines > 30){
-    #  (line_ratio <- (3*n_standards) / (lines))
-    #}else{
-    #  line_ratio <- 2.5
-    #}
     reporti <- ggpubr::ggarrange(p, pf, nrow=2,
                                  heights=c(render_ratio,1))
     #reporti

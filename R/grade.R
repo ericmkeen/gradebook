@@ -50,7 +50,7 @@ grade <- function(greeting = 'Dear STUDENT,\n\nWell-done here. I particularly ap
     render_ratio = 2.25
     ymax_padding = .2
     pdf_height = 10
-    #grade()
+    grade()
   }
   ##############################################################################
   ##############################################################################
@@ -88,10 +88,12 @@ grade <- function(greeting = 'Dear STUDENT,\n\nWell-done here. I particularly ap
                                     selected=1, width='100%'),
                         uiOutput('assignment'),
                         checkboxInput('offer_feedback', 'Provide written feedback?', value=FALSE, width='100%'),
+                        actionButton('get_missing', h6('View missing'), width='100%'),
                         hr(),
                         uiOutput('student'))),
         hr(),
         actionButton('save', h3('Save grade'), width='100%'),
+        uiOutput('status'),
         hr(),
         br(),
         shinyWidgets::materialSwitch('exempt', 'Exempt this student?',
@@ -106,6 +108,7 @@ grade <- function(greeting = 'Dear STUDENT,\n\nWell-done here. I particularly ap
         sliderInput('render_ratio', label = h6('Height ratio of rubric to notes'), value = render_ratio, min = .25, max = 10, step = .1, width = '100%'),
         sliderInput('wrap_rubric', label = h6('Line width of rubric items (in PDF)'), value = wrap_rubric, min = 20, max = 200, step = 1, width = '100%'),
         sliderInput('wrap_notes', label = h6('Line width of notes'), value = wrap_notes, min = 20, max = 200, step = 1, width = '100%'),
+        actionButton('view_most_recent', label=h6('View most recent grade report'), width='100%'),
         width=4
       ),
 
@@ -142,7 +145,6 @@ grade <- function(greeting = 'Dear STUDENT,\n\nWell-done here. I particularly ap
     rv$canned_writing <- ''
     rv$canned_other <- ''
     rv$feedback_preview <- ''
-    rv$grade_status <- data.frame()
     rv$comms_content <- comms_content
     rv$comms_writing <- comms_writing
     rv$comms_other <- comms_other
@@ -190,11 +192,9 @@ grade <- function(greeting = 'Dear STUDENT,\n\nWell-done here. I particularly ap
       if(!is.null(input$course) & input$course != '' &
          !is.null(input$assignment) & input$assignment != ''){
         (ass <- paste0(input$course, '/assignments/', input$assignment, '.rds'))
-        print(ass)
+        #print(ass)
         assi <- readRDS(ass)
         rv$assignment <- assi
-        # Update grade status dataframe
-        #rv$grade_status <- view_status(course_id = input$course)
       }
     })
 
@@ -207,9 +207,31 @@ grade <- function(greeting = 'Dear STUDENT,\n\nWell-done here. I particularly ap
       }
     })
 
+    output$status <- shiny::renderUI({
+      print(input$assignment)
+      if(all(!is.null(input$course), !is.null(rv$assignment), !is.null(input$student), !is.null(rv$proceed))){
+        assi <- rv$assignment$assignment_id
+        print(assi)
+        all_grades <- view_grades_quick(input$course, assi)
+        print(all_grades)
+        if(nrow(all_grades)>0){
+          if(input$student %in% all_grades$goes_by){
+            (gradefile <- paste0(input$course,'/grades/',input$course,' --- ',input$assignment,' --- ',input$student,'.RData'))
+            print(gradefile)
+            grade <- readRDS(gradefile)
+            helpText(paste0('Grade already on file = ', round(grade$percent,1),'%'))
+          }else{
+            helpText('No grade on file for this student.')
+          }
+        }else{
+          helpText('No grade on file for this student.')
+        }
+      }
+    })
+
     observeEvent(input$get_missing, {
-      if(!is.null(input$course)){
-        missings <- view_missing_quick(input$course, rv$assignment)
+      if(!is.null(input$course) & !is.null(input$assignment)){
+        missings <- view_missing_quick(input$course, input$assignment)
         #print(missings)
         showModal(modalDialog(
           title = "Missing submissions for this assignment:",
@@ -218,7 +240,6 @@ grade <- function(greeting = 'Dear STUDENT,\n\nWell-done here. I particularly ap
         ))
       }
     })
-
 
     #===========================================================================
     # rubric UI
@@ -550,17 +571,30 @@ grade <- function(greeting = 'Dear STUDENT,\n\nWell-done here. I particularly ap
                            grade$student$goes_by,'.RData')
         print(grade_fn)
 
+        # Most recent
+        www_fn <- 'www/most_recent.RData'
+
         # Save grade
         saveRDS(grade, file=grade_fn)
+        saveRDS(grade, file=www_fn)
         print('grade saved!')
 
         # Render grade report
         if(grade$exemption == FALSE){
+          # Official
           render_grade(grade_fn,
                        wrap_rubric = input$wrap_rubric,
                        wrap_notes = input$wrap_notes,
                        render_ratio = input$render_ratio,
                        pdf_height = input$pdf_height)
+
+          # For viewing the most recent
+          render_grade(www_fn,
+                       wrap_rubric = input$wrap_rubric,
+                       wrap_notes = input$wrap_notes,
+                       render_ratio = input$render_ratio,
+                       pdf_height = input$pdf_height)
+
           print('report generated!')
         }
 
@@ -576,11 +610,25 @@ grade <- function(greeting = 'Dear STUDENT,\n\nWell-done here. I particularly ap
       }}) # end save reactive
 
     #===========================================================================
+    # View most recent grade report
+
+    output$pdfview <- renderUI({
+      tags$iframe(style="height:600px; width:100%", src="pdfpath/most_recent.pdf")
+    })
+
+    observeEvent(input$view_most_recent, {
+      showModal(modalDialog(
+        uiOutput('pdfview'),
+        easyClose = TRUE
+      ))
+    })
 
   }
 
   ##############################################################################
   ##############################################################################
+  (mypath <- paste0(getwd(),'/www'))
+  shiny::addResourcePath(prefix='pdfpath', directoryPath=mypath)
 
   shinyApp(ui, server)
 }

@@ -14,8 +14,8 @@ view_missing_quick <- function(course_id,
                               assignment_id = NULL){
 
   if(FALSE){
-    course_id <- 'ESCI_220'
-    assignment_id <- 'Introduction'
+    course_id <- 'ENST_222'
+    assignment_id <- 'Chapter 1 Loomings'
     view_missing_quick(course_id, assignment_id)
     view_missing_quick('ENST_101')
     view_missing_quick('ENST_209')

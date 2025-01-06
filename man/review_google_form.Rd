@@ -7,7 +7,8 @@
 review_google_form(
   roster,
   form_url,
-  form_cols = c("datetime", "email", "topic", "which", "question", "abstract"),
+  form_cols = c("datetime", "email", "topic", "which", "question", "abstract", "pledged",
+    "graded"),
   week_of_class_start = 2
 )
 }
@@ -24,7 +25,9 @@ The column \code{which} is used to sort submissions within a topic/theme into gr
 Currently two groups are recognized by the function: \code{"Abstract"} and \code{"Discussion Q&A"}.
 If the \code{which} column contains the value \code{"Abstract"}, the function will look for a reading summary in a column named \code{abstract}.
 If the \code{which} column contains the value \code{"Discussion Q&A"}, the function will look for a discussion question in a column named \code{question},
-and it will look for a response in a column named \code{abstract}.}
+and it will look for a response in a column named \code{abstract}.
+The column \code{graded} is used to indicate which entries you have already graded. You manually maintain this column within the \code{GoogleSheet}.
+Each graded entry should have a \code{1} in this column. Ungraded entries should be blank.}
 
 \item{week_of_class_start}{Indicate which week of the year the class started in,
 in order for the function to assign each timestamp submission to a week of the cours.}
